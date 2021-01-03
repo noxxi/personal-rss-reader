@@ -55,10 +55,10 @@ background. Debug output (mostly about feed updates) is logged to stdout.
 There is no GUI support for this, since it is seldom needed.
 
     # Add feed
-    (cd server && node addfeeds.js feed-url)
+    (cd server && node addfeed.js feed-url)
 
     # Delete feed
-    (cd server && node delfeeds.js feed-url)
+    (cd server && node delfeed.js feed-url)
 
     # Update all favicons for feeds
     (cd server && node updicon.js)

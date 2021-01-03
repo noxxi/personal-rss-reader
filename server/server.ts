@@ -13,14 +13,6 @@ const port = 3000
 app.use(express.static('../client'))
 app.use(bodyParser.json());
 
-app.use(function(req, res, next) {
-  res.setHeader('Content-Security-Policy', "default-src 'self'; style-src 'self'; script-src 'self'; img-src *");
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type, Authorization');
-  next();
-});
-
-
 let get_items = (req: express.Request, res: express.Response) => {
   let p : { [k:string] : string } = {};
   Object.keys(req.query).forEach((k) => { p[k] = req.query[k]!.toString(); });
@@ -80,7 +72,7 @@ app.get('/api/icon/:i', (req,res) => {
     });
 });
 
-let updateTimer = setTimeout(updateRSS, 1000*1000);
+let updateTimer = setTimeout(updateRSS, 1*1000);
 
 app.listen(port, () => {
   D.verbose(`listening at http://localhost:${port}`)

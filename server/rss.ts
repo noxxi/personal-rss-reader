@@ -214,7 +214,7 @@ export default class RSS {
       }
 
       let del_ic : number|undefined;
-      if (force && !ic.new) {
+      if (force && !ic.new || !ic.icon) {
         // fetch new icon
         D.xdebug(7,`need to retrieve new icon for ${domain}`); 
         let data = await this.fetchIcon(domain);
