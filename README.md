@@ -14,16 +14,18 @@
 
 ## Keyboard shortcuts
 
-- 'k', Arrow Down - next item
-- 'j', Arrow Up - previous item
-- Space - toggle current item details
-- Enter - open current item in new tab and mark it read
-- 'm' - mark current item read
-- 'n' - mark all items read which are currently in view
-- 'a' - mark all items read until the current one
-- 'u' - undo last "mark read" operation
-- 'h' - toggle display of items marked as read
-- 'f' - toggle between Feeds and Items view
+| Key(s)        | Action    |
+| ------------- | --------- |
+| k, Arrow Down | next item |
+| j, Arrow Up   | previous item |
+| Space         | toggle current item details |
+| Enter         | open current item in new tab and mark it read |
+| m             | mark current item read |
+| n             | mark all items read which are currently in view |
+| a             | mark all items read until the current one |
+| u             | undo last "mark read" operation |
+| h             | toggle display of items marked as read |
+| f             | toggle between Feeds and Items view |
 
 ## Setup
 
