@@ -1,0 +1,31 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "@types/body-parser": "^1.19.0",
+    "@types/express": "^4.17.9",
+    "@types/node-fetch": "^2.5.7",
+    "@types/sanitize-html": "^1.27.0",
+    "@types/sqlite3": "^3.1.6",
+    "@types/xml2js": "^0.4.7",
+    "body-parser": "^1.19.0",
+    "commonjs": "^0.0.1",
+    "express": "^4.17.1",
+    "http-parser-js": "^0.5.2",
+    "node-fetch": "^2.6.1",
+    "npm": "^7.3.0",
+    "rss-parser": "^3.9.0",
+    "sanitize-html": "^2.3.0",
+    "sqlite3": "^5.0.0",
+    "webpack-cli": "^4.2.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -1,0 +1,84 @@
+* { font-family: Arial,sans-serif; }
+
+body { max-width: 80em; padding: 1em; }
+#items .content { 
+  width: 95%;  display: none; 
+  padding-left: 24px;
+  padding-top: 0.5em;
+  margin: 0;
+}
+
+#items .content img {
+  max-height: 60vh;
+  max-width: 70vw;
+}
+
+#items .item[data-read] { display: none; }
+#items[data-unread-visible] .item[data-read] { display: block; }
+#items[data-unread-visible] .item[data-read] .title { text-decoration: line-through; }
+
+
+#items .date {
+  border-top-style: double; border-bottom-style: double; 
+  border-width: 1px 0px;
+  margin-top: 1em; margin-bottom: 1em;
+  padding-top: 1em; padding-bottom: 1em;  
+  padding-left: 10em;
+}
+
+#activeitem { 
+  border-top-style: solid; border-bottom-style: solid; 
+  border-width: 1px 0px;
+  margin-top: 2px; margin-bottom: 2px;
+  padding-top: 2px; padding-bottom: 2px;
+}
+
+#activeitem .title {
+  font-weight: bold;
+}
+
+
+#items a:link {color: black; text-decoration: none;}
+#items a:visited { color: grey80; }
+#items a:hover { color: blue; }
+
+#items .icon { width: 16px; height: 16px; padding-right: 4px; }
+
+
+#header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2em;
+  line-height: 2em;
+  text-align: right;
+  padding-top: 1em;
+  padding-right: 2em;
+}
+
+#header button {
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: grey;
+  padding: 0.3em 0.5em;
+}
+#header .active {
+  background-color: darkorange;
+}
+
+#feeds td { padding: 0.2em 0.5em; }
+#feeds th { padding: 0.5em 0.5em; }
+#feeds .lastcheck, .lastupd, .nextupd, .unread, .total { text-align: right;}
+#feeds thead { background-color: #eee; margin-bottom: 1em;}
+#feeds .url { font-size: small;}
+#feeds table { border-width: 0; }
+#feeds table tr:nth-child(even) {background-color: #f2f2f2;}
+#feeds .icon { width: 16px; height: 16px; }
+
+#cataas { text-align: center;}
+#cataas img { max-width: 70vw; max-height: 60vh; padding: 10px; border-width: 2px; border-style: solid; border-color: grey; }
+#cataas .title { padding: 2em; }
+
+#indicator-unread-visible { color: green; display: none; }
