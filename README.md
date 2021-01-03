@@ -37,12 +37,12 @@
 
 ### Load dependencies and compile
 
-   $ (cd server && npm i && tsc)
-   $ (cd client && npm i && tsc && npx webpack)
+    $ (cd server && npm i && tsc)
+    $ (cd client && npm i && tsc && npx webpack)
 
 ### Startup and Run
 
-   $ (cd server && node --insecure-http-parser server.js)
+    $ (cd server && node --insecure-http-parser server.js)
 
 Note that `--insecure-http-parser` is needed in case a feed has an invalid
 HTTP header (as currently the case with https://www.sans.org/blog/feed.xml)
