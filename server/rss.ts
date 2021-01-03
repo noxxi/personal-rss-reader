@@ -194,17 +194,17 @@ export default class RSS {
     let icon = await this.db.getIcon(domain);
     if (!icon) {
       icon = {
-	rowid: 0,
-	domain: domain,
-	data: new ArrayBuffer(0),
+        rowid: 0,
+        domain: domain,
+        data: new ArrayBuffer(0),
       };
 
       // then try to fetch the file and update in database
       try {
-	let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`);
-	if (result.ok) icon.data = await result.arrayBuffer();
+        let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`);
+        if (result.ok) icon.data = await result.arrayBuffer();
       } catch {}
-      icon.rowid = await this.db.updIcon(icon);
+      if (icon.data.byteLength) icon.rowid = await this.db.updIcon(icon);
     }
 
     // ultimately return the file or some generic icon
