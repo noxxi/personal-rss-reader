@@ -1,4 +1,4 @@
-# Private, web based RSS reader with full keyboard control
+# Personal, web based RSS reader with full keyboard control
 
 ## Use case
 
@@ -16,8 +16,8 @@
 
 | Key(s)        | Action    |
 | ------------- | --------- |
-| k, Arrow Down | next item |
-| j, Arrow Up   | previous item |
+| j, Arrow Down | next item |
+| k, Arrow Up   | previous item |
 | Space         | toggle current item details |
 | Enter         | open current item in new tab and mark it read |
 | m             | mark current item read |
@@ -33,7 +33,7 @@
 
 - nodejs is needed, tested with v10.19.0 on Ubuntu 20.04
 - Typescript compiler is needed, tested with 3.8.3 on Ubuntu 20.04
-- to install these on Ubuntu 20.04: apt install nodejs node-typescript
+- to install these on Ubuntu 20.04: `apt install nodejs node-typescript`
 
 ### Load dependencies and compile
 
