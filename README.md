@@ -60,11 +60,18 @@ There is no GUI support for this, since it is seldom needed.
     # Delete feed
     (cd server && node delfeed.js feed-url)
 
-    # Update all favicons for feeds
-    (cd server && node updicon.js)
-
     # Forced update of all feeds now
     (cd server && node updfeed.js)
+
+
+### Display of favicons for sites
+
+Domain specific favicons are retrieved using
+`https://www.google.com/s2/favicons?domain=...` and then stored in the database.
+It is possible to override these by putting a PNG in `server/favicon/domain.png`.
+
+These icons are served with instructions for client-side caching, so any change
+might need a hard refresh and clearing the relevant parts of the cache.
 
 
 ## Security and Privacy

@@ -16,20 +16,19 @@ export default class Db {
         title Text,
         lastcheck integer,
         lastupd integer,
-        update_interval integer,
-        icon integer
+	update_interval integer
       )
     `);
     this.db.exec(`
-    create table if not exists items (
-      feed integer,
-      title string,
-      url string,
-      content string,
-      date integer,
-      lastseen integer
-    )
-  `);
+      create table if not exists items (
+	feed integer,
+	title string,
+	url string,
+	content string,
+	date integer,
+	lastseen integer
+      )
+    `);
     this.db.exec(`
       create table if not exists icons (
         domain string,
@@ -49,18 +48,18 @@ export default class Db {
   updFeed(f: T.Feed): Promise<number> {
     return new Promise((resolve, reject) => {
       let st: sqlite3.Statement;
-      let args = [f.url, f.title, f.lastcheck, f.lastupd, f.updateInterval, f.icon];
+      let args = [f.url, f.title, f.lastcheck, f.lastupd, f.updateInterval];
       if (!f.rowid) {
         D.xdebug(8,`insert new feed ${f.url}`);
         st = this.db.prepare(
-          "insert into feeds (url,title,lastcheck,lastupd,update_interval,icon) values (?,?,?,?,?,?)"
+	  "insert into feeds (url,title,lastcheck,lastupd,update_interval) values (?,?,?,?,?)"
         );
         args = [f.url, f.title];
       } else {
         D.xdebug(8,`update feed ${f.url}`);
         args.push(f.rowid);
         st = this.db.prepare(
-          "update feeds set url=?, title=?, lastcheck=?, lastupd=?, update_interval=?, icon=? where rowid=?"
+	  "update feeds set url=?, title=?, lastcheck=?, lastupd=?, update_interval=? where rowid=?"
         );
       }
       st.run(args, function (err) {
@@ -122,7 +121,6 @@ export default class Db {
               lastcheck: row.lastcheck,
               lastupd: row.lastupd,
               updateInterval: row.update_interval,
-              icon: row.icon,
             });
           }
         }
@@ -150,7 +148,6 @@ export default class Db {
               lastcheck: row.lastcheck,
               lastupd: row.lastupd,
               updateInterval: row.update_interval,
-              icon: row.icon,
               total: row.total,
               unread: row.unread,
             });
@@ -194,7 +191,7 @@ export default class Db {
   getItem(id: number | string): Promise<T.XFeedItem | undefined> {
     return new Promise((resolve, reject) => {
       this.db.get(
-        "select i.rowid,i.*,f.icon,r.date as read from items i join feeds f on f.rowid = i.feed left join read r on r.item = i.rowid " +
+	"select i.rowid,i.*,r.date as read from items i left join read r on r.item = i.rowid " +
         "where " + (typeof id == "number" ? "i.rowid=?" : "i.url=?"),
         [id],
         function (err, row) {
@@ -212,7 +209,6 @@ export default class Db {
               content: row.content,
               date: row.date,
               feed: row.feed,
-              icon: row.icon,
               read: row.read,
             });
           }
@@ -224,17 +220,17 @@ export default class Db {
   getItemsFor(filter: T.ItemFilter): Promise<T.XFeedItem[]> {
     let where: string[] = [];
     if (filter.mindate) {
-      where.push(`date>=${filter.mindate}`);
+      where.push(`i.date>=${filter.mindate}`);
     }
     if (filter.feed) {
-      where.push(`feed=${filter.feed}`);
+      where.push(`i.feed=${filter.feed}`);
     }
     if (!filter.unread) {
       where.push(`r.date is null`)
     }
     // TODO unread
     let sql =
-      "select i.rowid,i.*,f.icon,r.date as read from items i join feeds f on f.rowid = i.feed left join read r on r.item = i.rowid " +
+      "select i.rowid,i.*,r.date as read from items i left join read r on r.item = i.rowid " +
       (where.length ? " where " + where.join(" and ") : "") +
       " order by i.date,i.rowid" +
       ((filter.limit || 0) > 0 ? ` limit ${filter.limit}` : "") +
@@ -256,7 +252,6 @@ export default class Db {
                 content: row.content,
                 date: row.date,
                 feed: row.feed,
-                icon: row.icon,
                 read: row.read,
               };
             })

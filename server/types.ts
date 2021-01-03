@@ -5,7 +5,6 @@ export type Feed = {
   lastcheck: number;
   lastupd: number;
   updateInterval: number;
-  icon: number;
 };
 
 export type XFeed = Feed & {
@@ -15,7 +14,7 @@ export type XFeed = Feed & {
 
 export type Icon = {
   rowid: number;
-  domain: string,
+  domain: string;
   data: ArrayBuffer;
 };
 
@@ -29,8 +28,7 @@ export type FeedItem = {
 };
 
 export type XFeedItem = FeedItem & {
-  icon: number,
-  read: number,
+  read: number;
 };
 
 export type ItemFilter = {

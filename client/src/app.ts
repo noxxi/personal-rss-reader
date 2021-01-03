@@ -116,10 +116,11 @@ async function showItems(p: URLSearchParams|undefined) {
       nodes += `<div class="date">${eH(date)}</div>`;
     }
     
+    let domain = new URL(item.url).host;
     nodes += `
       <div class="item" data-id="${eH(item.rowid.toString())}"${isread(item.read)}>
        <div>
-        <img class="icon" src="/api/icon/${item.icon}">
+        <img class="icon" src="/api/icon/${domain}">
         <span class="title"><a href="${item.url}">${eH(item.title)}</a></span>
        </div>
        <div class="content" data-ct="${eH(item.content)}"></div> 
@@ -354,9 +355,10 @@ async function showFeeds(p: URLSearchParams|undefined) {
     if (unread != '0') unread = `<a href="#menu=items&feed=${feed.rowid}">${unread}</a>`;
     let total = feed.total.toString();
     if (total != '0') total = `<a href="#menu=items&unread=1&feed=${feed.rowid}">${total}</a>`;
+    let domain = new URL(feed.url).host;
     nodes += `
       <tr class="feed" data-id="${eH(feed.rowid.toString())}">
-       <td><img class="icon" src="/api/icon/${feed.icon}"></td>
+       <td><img class="icon" src="/api/icon/${domain}"></td>
        <td>
         <div class="title">${eH(feed.title)}</div>
         <div class="url">${eH(feed.url)}</div>
