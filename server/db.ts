@@ -16,17 +16,18 @@ export default class Db {
         title Text,
         lastcheck integer,
         lastupd integer,
-	update_interval integer
+        update_interval integer,
+        domain string
       )
     `);
     this.db.exec(`
       create table if not exists items (
-	feed integer,
-	title string,
-	url string,
-	content string,
-	date integer,
-	lastseen integer
+        feed integer,
+        title string,
+        url string,
+        content string,
+        date integer,
+        lastseen integer
       )
     `);
     this.db.exec(`
@@ -48,18 +49,18 @@ export default class Db {
   updFeed(f: T.Feed): Promise<number> {
     return new Promise((resolve, reject) => {
       let st: sqlite3.Statement;
-      let args = [f.url, f.title, f.lastcheck, f.lastupd, f.updateInterval];
+      let args = [f.url, f.title, f.lastcheck, f.lastupd, f.updateInterval, f.domain];
       if (!f.rowid) {
         D.xdebug(8,`insert new feed ${f.url}`);
         st = this.db.prepare(
-	  "insert into feeds (url,title,lastcheck,lastupd,update_interval) values (?,?,?,?,?)"
+	        "insert into feeds (url,title, lastcheck,lastupd,update_interval,domain) values (?,?,?,?,?,?)"
         );
         args = [f.url, f.title];
       } else {
         D.xdebug(8,`update feed ${f.url}`);
         args.push(f.rowid);
         st = this.db.prepare(
-	  "update feeds set url=?, title=?, lastcheck=?, lastupd=?, update_interval=? where rowid=?"
+	        "update feeds set url=?, title=?, lastcheck=?, lastupd=?, update_interval=?, domain=? where rowid=?"
         );
       }
       st.run(args, function (err) {
@@ -121,6 +122,7 @@ export default class Db {
               lastcheck: row.lastcheck,
               lastupd: row.lastupd,
               updateInterval: row.update_interval,
+              domain: row.domain,
             });
           }
         }
@@ -148,6 +150,7 @@ export default class Db {
               lastcheck: row.lastcheck,
               lastupd: row.lastupd,
               updateInterval: row.update_interval,
+              domain: row.domain,
               total: row.total,
               unread: row.unread,
             });
@@ -173,9 +176,7 @@ export default class Db {
       if (!item.rowid) {
         st = this.db.prepare("insert into items (feed,title,url,content,date) values (?,?,?,?,?)");
       } else {
-        st = this.db.prepare(
-          "update items set feed=?, title=?, url=?, content=?, date=? where rowid=?"
-        );
+        st = this.db.prepare("update items set feed=?, title=?, url=?, content=?, date=? where rowid=?");
         args.push(item.rowid);
       }
       st.run(args, function (err) {
@@ -191,7 +192,7 @@ export default class Db {
   getItem(id: number | string): Promise<T.XFeedItem | undefined> {
     return new Promise((resolve, reject) => {
       this.db.get(
-	"select i.rowid,i.*,r.date as read from items i left join read r on r.item = i.rowid " +
+	      "select i.rowid,i.*,f.domain,r.date as read from items i join feeds f on i.feed=f.rowid left join read r on r.item = i.rowid " +
         "where " + (typeof id == "number" ? "i.rowid=?" : "i.url=?"),
         [id],
         function (err, row) {
@@ -210,6 +211,7 @@ export default class Db {
               date: row.date,
               feed: row.feed,
               read: row.read,
+              domain: row.domain,
             });
           }
         }
@@ -230,7 +232,7 @@ export default class Db {
     }
     // TODO unread
     let sql =
-      "select i.rowid,i.*,r.date as read from items i left join read r on r.item = i.rowid " +
+      "select i.rowid,i.*,f.domain,r.date as read from items i join feeds f on i.feed=f.rowid left join read r on r.item = i.rowid " +
       (where.length ? " where " + where.join(" and ") : "") +
       " order by i.date,i.rowid" +
       ((filter.limit || 0) > 0 ? ` limit ${filter.limit}` : "") +
@@ -253,6 +255,7 @@ export default class Db {
                 date: row.date,
                 feed: row.feed,
                 read: row.read,
+                domain: row.domain,
               };
             })
           );

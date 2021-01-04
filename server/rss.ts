@@ -42,6 +42,7 @@ export default class RSS {
       lastcheck: 0,
       lastupd: 0,
       updateInterval: this.updateInterval_min,
+      domain: '',
     };
     let id = await this.db.updFeed(feed);
     feed.rowid = id;
@@ -207,7 +208,7 @@ export default class RSS {
       // then try to fetch the file and update in database
       try {
         let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`);
-        if (result.ok) icon.data = await result.arrayBuffer();
+        if (result.ok) icon.data = Buffer.from(await result.arrayBuffer());
       } catch {}
       if (icon.data.byteLength) icon.rowid = await this.db.updIcon(icon);
     }
