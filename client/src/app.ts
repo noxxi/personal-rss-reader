@@ -385,6 +385,11 @@ async function showFeeds(p: URLSearchParams|undefined) {
 
 // handles keyboard control
 function handleKeyDown(e: KeyboardEvent) {
+  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
+    // don't handle these
+    return;
+  } 
+
   // console.log(activeMenu, e.key);
   if (activeMenu == 'items') {
     if (e.key == "ArrowUp" || e.key == 'k') {
