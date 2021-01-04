@@ -94,8 +94,13 @@ export default class RSS {
       await this.db.updFeed(feed);
     };
 
-    let rp = new Parser();
-    let output: Parser.Output<{}>|undefined = undefined;
+    type CustomItem = {summary: string};
+    let rp = new Parser<{},CustomItem>({
+      customFields: {
+        item: ['summary']
+      }
+    });
+    let output: Parser.Output<CustomItem>|undefined = undefined;
     try { 
       let res = await fetch(feed.url);
       if (!res.ok)
@@ -147,7 +152,7 @@ export default class RSS {
       }
       D.xdebug(4,`new item ${item.link}: ${item.title} ${item.isoDate}`);
 
-      item.content = sanitizeHtml(item.content || "",{
+      item.content = sanitizeHtml(item.content || item.summary || "",{
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])
       });
 
