@@ -380,7 +380,9 @@ async function showFeeds(p: URLSearchParams|undefined) {
       me.preventDefault();
     }
   });
-  new Tablesort(feedsDiv.querySelector('table.feeds'));
+  new Tablesort(feedsDiv.querySelector('table.feeds'), {
+    descending: true
+  });
 }
 
 // ---------------------- KEY BINDINGS ---------------------------------------------
