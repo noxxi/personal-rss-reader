@@ -10,6 +10,7 @@ declare var openInBackground : (url: string) => void;
 let itemsDiv: HTMLDivElement;
 let feedsDiv: HTMLDivElement;
 let cataasDiv: HTMLDivElement|undefined;
+let keyboardFocus: HTMLElement|undefined;
 
 let activeItem: HTMLElement|undefined = undefined;
 let activeMenu = '';
@@ -350,6 +351,11 @@ async function showFeeds(p: URLSearchParams|undefined) {
       <th>Total</th>
      </tr></thead>
      <tbody>
+      <tr data-sort-method="none">
+       <td>&nbsp;</td>
+       <td><input size=50 id="filter" placeholder="Type to filter ..."></td>
+       <td colspan=5>&nbsp;</td>
+      </tr>
   `;
   feeds.forEach((feed,i) => {
     let unread = feed.unread.toString();
@@ -380,19 +386,42 @@ async function showFeeds(p: URLSearchParams|undefined) {
       me.preventDefault();
     }
   });
+
+  // make table sortable
   new Tablesort(feedsDiv.querySelector('table.feeds'), {
     descending: true
   });
+
+  // add some search
+  let input = feedsDiv.querySelector('input#filter')! as HTMLInputElement;
+  let filter = () => {
+    let v = input.value.toLowerCase();
+    console.log(`search for ${v}`);
+    feedsDiv.querySelectorAll('tr.feed').forEach(e => {
+      let text = (e.children[1] as HTMLElement).innerText.toLowerCase();
+      let w = text.includes(v) ? '' : 'none';
+      console.log(`[${w}] ${text}`);
+      (e as HTMLElement).style.display = w;
+    });
+  }
+  let timer: any;
+  input.onkeydown = () => {
+    if (timer) clearTimeout(timer);
+    timer = setTimeout(filter, 100);
+  }
+  if (input.value) filter();
+  console.log("added onkeydown at input " + input.onkeydown);
 }
 
 // ---------------------- KEY BINDINGS ---------------------------------------------
 
 // handles keyboard control
 function handleKeyDown(e: KeyboardEvent) {
-  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) {
-    // don't handle these
-    return;
-  } 
+  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+  if ((e.target as HTMLElement).matches('input')) {
+    console.log("ignore keypress " + e.key);
+    return; // filter input
+  }
 
   // console.log(activeMenu, e.key);
   if (activeMenu == 'items') {
