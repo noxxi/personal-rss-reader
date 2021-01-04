@@ -1,5 +1,6 @@
 import * as T from "./types.js";
 import * as E from "entities";
+import Tablesort = require("tablesort");
 
 let eH = E.encodeHTML;
 
@@ -339,10 +340,10 @@ async function showFeeds(p: URLSearchParams|undefined) {
   // console.log(feeds);
   let nodes = `
     <table class="feeds">
-     <thead><tr>
-      <th>&nbsp;<!-- Icon --></th>
+     <thead><tr class="header">
+      <th data-sort-method='none'>&nbsp;<!-- Icon --></th>
       <th>Title</th>
-      <th>LastUpd</th>
+      <th data-sort-default>LastUpd</th>
       <th>LastChk</th>
       <th>NextChk</th>
       <th>Unread</th>
@@ -363,9 +364,9 @@ async function showFeeds(p: URLSearchParams|undefined) {
         <div class="title">${eH(feed.title)}</div>
         <div class="url">${eH(feed.url)}</div>
        </td>
-       <td class="lastupd">${eH(toTimeOrDate(feed.lastupd))}</td>
-       <td class="lastcheck">${eH(toTimeOrDate(feed.lastcheck))}</td>
-       <td class="nextupd">${eH(toTimeOrDate(feed.lastcheck + feed.updateInterval))}</td>
+       <td class="lastupd" data-sort="${feed.lastupd}">${eH(toTimeOrDate(feed.lastupd))}</td>
+       <td class="lastcheck" data-sort="${feed.lastcheck}">${eH(toTimeOrDate(feed.lastcheck))}</td>
+       <td class="nextupd" data-sort="${feed.lastcheck+feed.updateInterval}">${eH(toTimeOrDate(feed.lastcheck + feed.updateInterval))}</td>
        <td class="unread">${unread}</td>
        <td class="total">${total}</td>
     `;
@@ -378,7 +379,8 @@ async function showFeeds(p: URLSearchParams|undefined) {
       spa();
       me.preventDefault();
     }
-  })
+  });
+  new Tablesort(feedsDiv.querySelector('table.feeds'));
 }
 
 // ---------------------- KEY BINDINGS ---------------------------------------------
@@ -551,5 +553,3 @@ async function rest(cmd: string, data: any = undefined) : Promise<any> {
     })
   })
 }
-
-

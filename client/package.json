@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "entities": "^2.1.0",
-    "escape-html": "^1.0.3"
+    "escape-html": "^1.0.3",
+    "tablesort": "^5.2.1"
   }
 }
