@@ -1,6 +1,8 @@
 import * as T from "./types.js";
 import * as E from "entities";
 import Tablesort = require("tablesort");
+import dialogPolyfill from 'dialog-polyfill';
+
 
 let eH = (s: string|undefined|null) => {
   if (!s) return '';
@@ -32,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
   itemsDiv = document.getElementById("items")! as HTMLDivElement; 
   feedsDiv = document.getElementById("feeds")! as HTMLDivElement; 
   cataasDiv = document.getElementById("cataas") as HTMLDivElement|undefined;
+
+  document.querySelectorAll('dialog').forEach(e => {
+    dialogPolyfill.registerDialog(e);
+  });
 
   itemsDiv.onclick = (e) => {
     let node = findItemNode(e.target);
