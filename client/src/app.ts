@@ -609,36 +609,16 @@ async function rest(cmd: string, data: any = undefined) : Promise<any> {
 
 function editFeed(tr: HTMLElement) {
   rest('get-feed', { rowid: tr.dataset.id }).then(feed => {
-    let modal = document.getElementById('modal')!;
-    let mc = document.getElementById('modal-content')!;
-    mc.innerHTML = `
-      <form>
-        <table>
-          <tr>
-            <td>Title</td>
-            <td>${eH(feed.title)}</td>
-          </tr>
-          <tr>
-            <td>URL</td>
-            <td><input size=100 name=url value="${eH(feed.url)}" /></td>
-          </tr>
-          <tr>
-          <td>Domain</td>
-          <td><input size=100 name=domain value="${eH(feed.domain)}" /></td>
-        </tr>
-        <tr><td colspan=2>
-          <button type=reset>Cancel</button>
-          <button type=submit>Save</button>
-        </td></tr>
-        </table>
-      </form>
-    `;
+    let dialog = document.querySelector('#editFeed')! as HTMLDialogElement;
+    let form = dialog.getElementsByTagName('form')[0]!;
+    let elem = form.elements;
+    (elem.namedItem('title') as HTMLInputElement).value = feed.title;
+    (elem.namedItem('url') as HTMLInputElement).value = feed.url;
+    (elem.namedItem('domain') as HTMLInputElement).value = feed.domain || '';
 
-    let form = mc.getElementsByTagName('form')[0]!;
     let editDone = (save: boolean, e: Event) => {
       let down = () => {
-        console.log('down Edit Feed');
-        modal.style.display = 'none';
+        console.log('done Edit Feed');
         localKeydown = undefined;
       };
       if (save) {
@@ -648,15 +628,14 @@ function editFeed(tr: HTMLElement) {
         let changed : string[] = [];
         if (nf.url != feed.url) changed.push('url');
         if (nf.domain != (feed.domain || '')) changed.push('domain');
-        // console.log({ save: save, changed: changed, ...nf });
+        console.log({ save: save, changed: changed, ...nf });
         if (changed && save) {
-          form.onreset = null;
-          form.onsubmit = null;
           localKeydown = (e) => { e.preventDefault() };
           rest('update-feed', nf).then(() => {
             console.log('saved');
             (tr.querySelector('.url')! as HTMLElement).innerText = nf.url;
-            if (nf.domain) (tr.querySelector('.icon')! as HTMLImageElement).src = "/api/icon/"+nf.domain;
+            (tr.querySelector('.icon')! as HTMLImageElement).src =
+              "/api/icon/" + (nf.domain || new URL(nf.url).host);
             down();
           }).catch((why) => {
             console.log('saving failed: ' + why);
@@ -672,11 +651,13 @@ function editFeed(tr: HTMLElement) {
       e.preventDefault();
     };
 
-    form.onreset = (e) => { editDone(false, e) };
-    form.onsubmit = (e) => { editDone(true, e) };
+    dialog.onclose = (e) => {
+      editDone( dialog.returnValue == 'save' ? true: false, e);
+    };
 
     console.log('Edit Feed up');
-    modal.style.display = 'block';
+
+    dialog.showModal();
     localKeydown = (e: KeyboardEvent) => {
       if (e.key == 'Escape') return editDone(false,e);
       e.preventDefault();

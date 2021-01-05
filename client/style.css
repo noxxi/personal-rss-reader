@@ -91,6 +91,12 @@ table#help td,th { padding: 0.5em 2em; text-align: left; }
 table#help td:first-child,th:first-child { text-align: right;}
 table#help td.h3 { text-align: center; background-color: silver; padding: 0.5em; font-size: 130%; }
 
+#editFeed { padding: 2em; font-size: 110%; }
+#editFeed input { font-size: 100%; padding: 0.4em; margin-left: 2em; }
+#editFeed button { padding: 0.5em; font-size: 100%; margin-top: 1em; }
+#editFeed button:first-child { border: 3px solid black; }
+
+
 
 #cataas { text-align: center;}
 #cataas img { max-width: 70vw; max-height: 60vh; padding: 10px; border-width: 2px; border-style: solid; border-color: grey; }

@@ -20,9 +20,34 @@
     <div id="feeds"></div>
     <div id="items"></div>
     <div id="cataas"></div>
-    <div id="modal">
+
+    <div id="modal" style="display:none;">
       <div id="modal-content"></div>
     </div>
+
+    <dialog id="editFeed">
+      <form method="dialog">
+	<table>
+	  <tr>
+	    <td>Title</td>
+	    <td><input size=80 name="title" readonly></td>
+	  </tr>
+	  <tr>
+	    <td>URL</td>
+	    <td><input size=80 name="url"></td>
+	  </tr>
+	  <tr>
+	    <td>Domain</td>
+	    <td><input size=80 name="domain"></td>
+	  </tr>
+	  <tr><td colspan=2>
+	    <button value="cancel">Cancel</button>
+	    <button value="save">Save</button>
+	  </td></tr>
+	</table>
+      </form>
+    </dialog>
+
   </div>
 
 </body>
