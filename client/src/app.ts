@@ -409,7 +409,7 @@ async function showFeeds(p: URLSearchParams|undefined) {
     let v = input.value.toLowerCase();
     // console.log(`search for ${v}`);
     feedsDiv.querySelectorAll('tr.feed').forEach(e => {
-      let text = (e.children[1] as HTMLElement).innerText.toLowerCase();
+      let text = (e.children[1] as HTMLElement).textContent?.toLowerCase() || '';
       let w = text.includes(v) ? '' : 'none';
       // console.log(`[${w}] ${text}`);
       (e as HTMLElement).style.display = w;
@@ -589,9 +589,9 @@ let queue = (function(maxq = 1){
     let total = waitq.length + active;
     if (activeDiv) {
       if (total) {
-        activeDiv.innerText = '';
+        activeDiv.textContent = '';
       } else {
-        activeDiv.innerText = total.toString() + 'outstanding XHR';
+        activeDiv.textContent = total.toString() + ' outstanding XHR';
       }
     }
     console.log(`${total} outstanding XHR`);
@@ -622,50 +622,68 @@ function editFeed(tr: HTMLElement) {
     (elem.namedItem('url') as HTMLInputElement).value = feed.url;
     (elem.namedItem('domain') as HTMLInputElement).value = feed.domain || '';
 
-    let editDone = (save: boolean, e: Event) => {
-      let down = () => {
-        console.log('done Edit Feed');
-        localKeydown = undefined;
-      };
-      if (save) {
-        let nf : T.Feed = { ...feed };
-        nf.url = form.url.value;
-        nf.domain = form.domain.value;
-        let changed : string[] = [];
-        if (nf.url != feed.url) changed.push('url');
-        if (nf.domain != (feed.domain || '')) changed.push('domain');
-        console.log({ save: save, changed: changed, ...nf });
-        if (changed && save) {
-          localKeydown = (e) => { e.preventDefault() };
-          rest('update-feed', nf).then(() => {
-            console.log('saved');
-            (tr.querySelector('.url')! as HTMLElement).innerText = nf.url;
-            (tr.querySelector('.icon')! as HTMLImageElement).src =
-              "/api/icon/" + (nf.domain || new URL(nf.url).host);
-            down();
-          }).catch((why) => {
-            console.log('saving failed: ' + why);
-            down();
-          });
-          e.preventDefault();
-          return;
-        }
-      } else {
-        console.log("not saved");
+    type finalcb = () => void;
+    let save = (final: finalcb) => {
+      let nf : T.Feed = { ...feed };
+      nf.url = form.url.value;
+      nf.domain = form.domain.value;
+      let changed : string[] = [];
+      if (nf.url != feed.url) changed.push('url');
+      if (nf.domain != (feed.domain || '')) changed.push('domain');
+      console.log({ save: save, changed: changed, ...nf });
+      if (!changed || !save) return;
+      localKeydown = (e) => { e.preventDefault() };
+      rest('update-feed', nf).then(() => {
+        console.log('saved');
+        (tr.querySelector('.url')! as HTMLElement).textContent = nf.url;
+        (tr.querySelector('.icon')! as HTMLImageElement).src =
+          "/api/icon/" + (nf.domain || new URL(nf.url).host);
+        final();
+      }).catch((why) => {
+        console.log('saving failed: ' + why);
+        final();
+      });
+    };
+
+    let cancel = (final: finalcb) => {
+      console.log('edit aborted');
+      final();
+    };
+
+    let deleteFeed = (final: finalcb) => {
+      console.log('delete Feed');
+      if (!confirm("Do you really want to delete Feed?")) {
+        final();
+        return;
       }
-      down();
+      rest('delete-feed', { rowid: feed.rowid }).then(() => {
+        console.log('feed deleted');
+        tr.parentElement?.removeChild(tr);
+        final();
+      }).catch(why => {
+        console.log('feed not deleted: ' + why);
+      });
+    }
+
+    let editDone = (e: Event, action: (final: finalcb) => void) => {
       e.preventDefault();
+      action(() => {
+        localKeydown = undefined;
+      });
     };
 
     dialog.onclose = (e) => {
-      editDone( dialog.returnValue == 'save' ? true: false, e);
+      editDone(e,
+        dialog.returnValue == 'save' ? save :
+        dialog.returnValue == 'delete' ? deleteFeed :
+        cancel
+      );
     };
 
     console.log('Edit Feed up');
-
     dialog.showModal();
     localKeydown = (e: KeyboardEvent) => {
-      if (e.key == 'Escape') return editDone(false,e);
+      if (e.key == 'Escape') return editDone(e, cancel);
       e.preventDefault();
     }
   });

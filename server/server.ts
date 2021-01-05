@@ -53,6 +53,14 @@ app.post('/api/update-feed', (req, res) => {
     })
 });
 
+app.post('/api/delete-feed', (req, res) => {
+  let rowid = +req.body.rowid;
+  rss.delFeed(rowid)
+    .then(() => {
+      res.json({ result: 'ok'})
+    })
+});
+
 app.post('/api/set-read', (req, res) => {
   let items = req.body.items as number[];
   rss.markItemsRead(items);

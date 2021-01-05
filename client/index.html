@@ -26,7 +26,7 @@
         <table>
           <tr>
             <td>Title</td>
-            <td><input size=80 name="title" readonly></td>
+            <td><input size=80 tabindex="-1" name="title" readonly></td>
           </tr>
           <tr>
             <td>URL</td>
@@ -34,12 +34,15 @@
           </tr>
           <tr>
             <td>Domain</td>
-            <td><input size=80 name="domain"></td>
+            <td><input size=80  autofocus name="domain"></td>
           </tr>
           <tr>
             <td colspan=2>
-              <button value="cancel">Cancel</button>
-              <button value="save">Save</button>
+              <div class=buttons>
+                <button value="cancel">Cancel</button>
+                <button value="save">Save</button>
+                <button value="delete">Delete Feed</button>
+              </div>
             </td>
           </tr>
         </table>

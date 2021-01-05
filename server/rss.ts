@@ -42,9 +42,13 @@ export default class RSS {
     return feed;
   }
 
-  async delFeed(url: string) {
-    let feed = await this.db.getFeed(url);
-    if (feed) await this.db.delFeed(feed.rowid);
+  async delFeed(id: string|number) {
+    if (typeof id == "string") {
+      let feed = await this.db.getFeed(id);
+      if (!feed) return;
+      id = feed.rowid;
+    }
+    if (id) await this.db.delFeed(id);
   }
 
   async getFeed(id: number|string) {

@@ -94,8 +94,13 @@ body { max-width: 80em; padding: 1em; }
 
 #editFeed { padding: 2em; font-size: 110%; }
 #editFeed input { font-size: 100%; padding: 0.4em; margin-left: 2em; }
-#editFeed button { padding: 0.5em; font-size: 100%; margin-top: 1em; }
+#editFeed .buttons { display: inline-block; }
+#editFeed button { padding: 0.5em; font-size: 100%; margin-top: 1em; border-radius: 5px; min-width: 7em; }
 #editFeed button:first-child { border: 3px solid black; }
+#editFeed button[value="save"] { background-color: yellow; }
+#editFeed button[value="save"] { background-color: yellowgreen; margin-left: 1em; }
+#editFeed button[value="delete"] { background-color: tomato; margin-left: 10em; }
+#editFeed input[readonly] { background-color: whitesmoke; border: 1px solid #999; outline: none; }
 
 
 
