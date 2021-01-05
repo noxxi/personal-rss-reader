@@ -35,6 +35,9 @@ app.get('/api/get-feeds', (req, res) => {
   rss.getXFeeds()
     .then(feeds => {
       res.json(feeds)
+    }).catch(why => {
+      res.sendStatus(404);
+      res.json({ error: why });
     })
 });
 
@@ -43,6 +46,9 @@ app.post('/api/get-feed', (req, res) => {
   rss.getFeed(rowid)
     .then(feed => {
       res.json(feed)
+    }).catch(why => {
+      res.sendStatus(404);
+      res.json({ error: why });
     })
 });
 
@@ -50,6 +56,9 @@ app.post('/api/update-feed', (req, res) => {
   rss.updFeed(req.body)
     .then(rowid => {
       res.json({ rowid: rowid })
+    }).catch(why => {
+      res.sendStatus(404);
+      res.json({ error: why });
     })
 });
 
@@ -58,6 +67,9 @@ app.post('/api/delete-feed', (req, res) => {
   rss.delFeed(rowid)
     .then(() => {
       res.json({ result: 'ok'})
+    }).catch(why => {
+      res.sendStatus(404);
+      res.json({ error: why });
     })
 });
 
@@ -84,6 +96,7 @@ app.get('/api/icon/:domain', (req,res) => {
     })
     .catch(err =>  {
       res.sendStatus(404);
+      res.json({error: err});
     });
 });
 

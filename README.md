@@ -12,20 +12,17 @@
 - currently not recommended for mobile phones, since keyboard control cannot be
   used there
 
-## Keyboard shortcuts
+## General use
 
-| Key(s)        | Action    |
-| ------------- | --------- |
-| j, Arrow Down | next item |
-| k, Arrow Up   | previous item |
-| Space         | toggle current item details |
-| Enter         | open current item in new tab and mark it read |
-| m             | mark current item read |
-| n             | mark all items read which are currently in view |
-| a             | mark all items read until the current one |
-| u             | undo last "mark read" operation |
-| h             | toggle display of items marked as read |
-| f             | toggle between Feeds and Items view |
+- load application and press '?' for the keyboard shortcuts
+- to add a feed: 
+    - switch to feed view 
+    - enter or paste feed URL in "search" input 
+    - a "Add Feed" button will magically appear for a valid URL
+    - klick it, confirm
+    - it will be initially added with NO TITLE, wait a while to load the feed
+      (reload will keep filter)
+- Enjoy
 
 ## Setup
 

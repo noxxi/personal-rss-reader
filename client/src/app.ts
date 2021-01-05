@@ -23,7 +23,7 @@ let activeItem: HTMLElement|undefined = undefined;
 let activeMenu = '';
 let unread_visible = false;
 
-let menu2action: { [k:string] : (p: URLSearchParams|undefined) => void } = {
+let menu2action: { [k:string] : (p: URLSearchParams) => void } = {
   feeds: (p) => { showFeeds(p) },
   items: (p) => { showItems(p) }
 };
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
   spa()
 });
 
-function spa(w: { [k:string] : string } = {}) {
+function setLocationHash(w: { [k:string] : string } = {}) : URLSearchParams {
   let p = new URLSearchParams(location.hash.substr(1));
   Object.entries(w).forEach((e) => {
     p.set(e[0],e[1]);
@@ -66,21 +66,24 @@ function spa(w: { [k:string] : string } = {}) {
   if (p.get('menu') == 'feeds') {
     p.delete('unread');
     p.delete('feed');
+  } else if (p.get('menu') == 'items') {
+    p.delete('feed-filter');
   }
   location.hash = '#' + p.toString();
-  activateMenu(p.get('menu')!,p);
+  return p;
 }
 
-// switch between views items and feeds
-function activateMenu(w: string, p: URLSearchParams|undefined = undefined) {
+function spa(w: { [k:string] : string } = {}) {
+  let p = setLocationHash(w);
+  let menu  = p.get('menu')!;
   activeMenu = '';
   document.querySelectorAll('#header [id^="show-"]').forEach(e => {
-    console.log('menu',e.id,w);
-    if (e.id == 'show-'+w) {
+    console.log('menu',e.id,menu);
+    if (e.id == 'show-'+menu) {
       e.classList.add('active');
-      (document.querySelector('#main #' + w) as HTMLElement).style.display = 'block';
-      activeMenu = w;
-      menu2action[w](p);
+      (document.querySelector('#main #' + menu) as HTMLElement).style.display = 'block';
+      activeMenu = menu;
+      menu2action[menu](p);
     } else {
       e.classList.remove('active');
       let xid = e.id.replace('show-','');
@@ -107,7 +110,7 @@ function toTimeOrDate(t:number) {
 // ---------------------- ITEMS ---------------------------------------------
 
 // get Items from server
-async function showItems(p: URLSearchParams|undefined) {
+async function showItems(p: URLSearchParams) {
   let filter: T.ItemFilter = {
     unread: +(p && p.get('unread') || '0'),
     feed: +(p && p.get('feed') || '0'),
@@ -346,7 +349,7 @@ function fixDateShownInItemList() {
 
 
 // get Feeds from server
-async function showFeeds(p: URLSearchParams|undefined) {
+async function showFeeds(p: URLSearchParams) {
   let feeds = (await rest('get-feeds')) as T.XFeed[];
   if (cataasDiv) cataasDiv.style.display = 'none';
   // console.log(feeds);
@@ -365,7 +368,10 @@ async function showFeeds(p: URLSearchParams|undefined) {
       <tr data-sort-method="none">
        <td>&nbsp;</td>
        <td><input size=50 id="filter" placeholder="Type to filter ..."></td>
-       <td colspan=5>&nbsp;</td>
+       <td colspan=5>
+        <button id="add-feed" style="display:none;">Add Feed</button>
+        &nbsp;
+       </td>
       </tr>
   `;
   feeds.forEach((feed,i) => {
@@ -405,18 +411,47 @@ async function showFeeds(p: URLSearchParams|undefined) {
 
   // add some search
   let input = feedsDiv.querySelector('input#filter')! as HTMLInputElement;
+  input.value = p.get('feed-filter') || '';
+
+  let addFeedButton = feedsDiv.querySelector('button#add-feed')! as HTMLElement;
+  addFeedButton.onclick = () => {
+    let url = input.value;
+    if (!confirm(`Add ${url} as new Feed?`)) return;
+    rest('update-feed', { url: url, title: "NO TITLE YET" })
+      .then(feed => {
+        console.log(`added ${url} as new feed`, feed);
+        spa();
+      }).catch(why => {
+        console.log(`failed to add ${url} as feed - ${why}`);
+      })
+  };
+
   let filter = () => {
     let v = input.value.toLowerCase();
     // console.log(`search for ${v}`);
+    setLocationHash({ 'feed-filter': v });
+    let addFeed = true;
     feedsDiv.querySelectorAll('tr.feed').forEach(e => {
       let text = (e.children[1] as HTMLElement).textContent?.toLowerCase() || '';
       let w = text.includes(v) ? '' : 'none';
       // console.log(`[${w}] ${text}`);
       (e as HTMLElement).style.display = w;
+      if (!w) addFeed = false;
     });
+    if (addFeed) {
+      try {
+        let u = new URL(v);
+        if (u.protocol != 'http:' && u.protocol != 'https:') throw "wrong protocol";
+        if (!u.hostname.match(/^\w+(\.\w+)+$/)) throw "not a hostname";
+        if (u.pathname.length<2) throw "path too short";
+      } catch {
+        addFeed = false;
+      }
+    }
+    addFeedButton.style.display = addFeed ? 'inline' : 'none';
   }
   let timer: any;
-  input.onkeydown = () => {
+  input.onkeydown = input.onpaste = () => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(filter, 100);
   }

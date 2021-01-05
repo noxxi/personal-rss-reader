@@ -83,14 +83,7 @@ body { max-width: 80em; padding: 1em; }
   border-bottom: 1px solid black;
 }
 
-#showHelp { padding: 2em; }
-#showHelp table { border: 0; border-collapse: collapse; margin: 2em auto;  }
-#showHelp table tr:nth-child(even) { background-color: #f2f2f2; }
-#showHelp table tr:nth-child(odd) { background-color: #fafafa; }
-#showHelp table th { background-color: #ddd; }
-#showHelp table td,th { padding: 0.5em 2em; text-align: left; }
-#showHelp table td:first-child,th:first-child { text-align: right;}
-#showHelp table td.h3 { text-align: center; background-color: silver; padding: 0.5em; font-size: 130%; }
+button#add-feed { background-color: orange; border-radius: 5px; padding: 0.1em 0.5em; }
 
 #editFeed { padding: 2em; font-size: 110%; }
 #editFeed input { font-size: 100%; padding: 0.4em; margin-left: 2em; }
@@ -101,6 +94,15 @@ body { max-width: 80em; padding: 1em; }
 #editFeed button[value="save"] { background-color: yellowgreen; margin-left: 1em; }
 #editFeed button[value="delete"] { background-color: tomato; margin-left: 10em; }
 #editFeed input[readonly] { background-color: whitesmoke; border: 1px solid #999; outline: none; }
+
+#showHelp { padding: 2em; }
+#showHelp table { border: 0; border-collapse: collapse; margin: 2em auto;  }
+#showHelp table tr:nth-child(even) { background-color: #f2f2f2; }
+#showHelp table tr:nth-child(odd) { background-color: #fafafa; }
+#showHelp table th { background-color: #ddd; }
+#showHelp table td,th { padding: 0.5em 2em; text-align: left; }
+#showHelp table td:first-child,th:first-child { text-align: right;}
+#showHelp table td.h3 { text-align: center; background-color: silver; padding: 0.5em; font-size: 130%; }
 
 
 
