@@ -69,13 +69,24 @@ body { max-width: 80em; padding: 1em; }
 }
 
 #feeds td { padding: 0.2em 0.5em; }
-#feeds th { padding: 0.5em 0.5em; }
+#feeds th { padding: 0.5em 0.5em; border-left: 4px solid white; border-right: 4px solid white;  }
 #feeds .lastcheck, .lastupd, .nextupd, .unread, .total { text-align: right;}
 #feeds thead { background-color: #eee; margin-bottom: 1em;}
 #feeds .url { font-size: small;}
-#feeds table { border-width: 0; }
+#feeds table { border-width: 0; border-collapse: collapse; }
 #feeds table tr:nth-child(even) {background-color: #f2f2f2;}
 #feeds .icon { width: 16px; height: 16px; }
+#feeds .url { display: none; }
+#feeds .title:hover + .url { display: block; }
+#feeds tr.feed:hover td {
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+table#help { border-width: 0; border-collapse: collapse; width: 100%;  }
+table#help tr:nth-child(even) { background-color: #f2f2f2; }
+table#help td { padding: 1em 2em; }
+table#help th { text-align: left; padding: 1em 2em; border: 1px solid black; }
 
 #cataas { text-align: center;}
 #cataas img { max-width: 70vw; max-height: 60vh; padding: 10px; border-width: 2px; border-style: solid; border-color: grey; }
@@ -116,4 +127,25 @@ th[aria-sort]:not(.no-sort):after {
 th[role=columnheader]:not(.no-sort):hover:after {
 	visibility: visible;
 	opacity: 1;
+}
+
+#modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  background-color: rgb(0,0,0);
+  background-color: rgba(0,0,0,0.4);
+}
+
+#modal-content {
+  background-color: #fefefe;
+  margin: 15vh auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80vw;
 }

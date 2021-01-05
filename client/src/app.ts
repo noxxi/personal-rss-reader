@@ -10,7 +10,9 @@ declare var openInBackground : (url: string) => void;
 let itemsDiv: HTMLDivElement;
 let feedsDiv: HTMLDivElement;
 let cataasDiv: HTMLDivElement|undefined;
-let keyboardFocus: HTMLElement|undefined;
+
+type keyboardCB = (e: KeyboardEvent) => void;
+let localKeydown: keyboardCB | undefined;
 
 let activeItem: HTMLElement|undefined = undefined;
 let activeMenu = '';
@@ -411,19 +413,27 @@ async function showFeeds(p: URLSearchParams|undefined) {
   }
   if (input.value) filter();
   console.log("added onkeydown at input " + input.onkeydown);
+
+  // edit on double-click over feed
+  feedsDiv.ondblclick = (e) => {
+    let tr = e.target instanceof HTMLElement &&  e.target.closest('tr.feed');
+    if (!tr) return;
+    console.log(tr);
+  };
 }
 
 // ---------------------- KEY BINDINGS ---------------------------------------------
 
 // handles keyboard control
 function handleKeyDown(e: KeyboardEvent) {
-  if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+  if (e.ctrlKey || e.altKey || e.metaKey) return;
   if ((e.target as HTMLElement).matches('input')) {
     console.log("ignore keypress " + e.key);
     return; // filter input
   }
+  if (localKeydown) return localKeydown(e);
 
-  // console.log(activeMenu, e.key);
+  console.log(activeMenu, e.key);
   if (activeMenu == 'items') {
     if (e.key == "ArrowUp" || e.key == 'k') {
       activateByOffset(-1);
@@ -451,6 +461,8 @@ function handleKeyDown(e: KeyboardEvent) {
       markReadAllVisible();
     } else if (e.key == 'h') {
       toggleVisibilityUnread();
+    } else if (e.key == '?') {
+      showHelp();
     } else {
       return;
     }
@@ -504,6 +516,8 @@ function moveIntoView(e: HTMLElement, pad = 50) {
   console.log('scrollBy',scroll);
   window.scrollBy(0,scroll);
 }
+
+
 
 // ---------------------- XHR MGR ---------------------------------------------
 
@@ -583,4 +597,72 @@ async function rest(cmd: string, data: any = undefined) : Promise<any> {
       else resolve(data);
     })
   })
+}
+
+
+// ---------------------- Help window ---------------------------------------------
+
+function showHelp() {
+  let modal = document.getElementById('modal')!;
+  let mc = document.getElementById('modal-content')!;
+  mc.innerHTML = `
+  <table id="help">
+  <thead>
+  <tr>
+  <th>Key(s)</th>
+  <th>Action</th>
+  </tr>
+  </thead>
+  <tbody>
+  <tr>
+  <td>j, Arrow Down</td>
+  <td>next item</td>
+  </tr>
+  <tr>
+  <td>k, Arrow Up</td>
+  <td>previous item</td>
+  </tr>
+  <tr>
+  <td>Space</td>
+  <td>toggle current item details</td>
+  </tr>
+  <tr>
+  <td>Enter</td>
+  <td>open current item in new tab and mark it read</td>
+  </tr>
+  <tr>
+  <td>m</td>
+  <td>mark current item read</td>
+  </tr>
+  <tr>
+  <td>n</td>
+  <td>mark all items read which are currently in view</td>
+  </tr>
+  <tr>
+  <td>a</td>
+  <td>mark all items read until the current one</td>
+  </tr>
+  <tr>
+  <td>u</td>
+  <td>undo last "mark read" operation</td>
+  </tr>
+  <tr>
+  <td>h</td>
+  <td>toggle display of items marked as read</td>
+  </tr>
+  <tr>
+  <td>f</td>
+  <td>toggle between Feeds and Items view</td>
+  </tr>
+  </tbody>
+  </table>
+  `;
+  modal.style.display = 'block';
+  console.log('show Help up');
+  localKeydown = (e: KeyboardEvent) => {
+    console.log('down show Help');
+    modal.style.display = 'none';
+    localKeydown = undefined;
+    e.preventDefault();
+  }
 }
