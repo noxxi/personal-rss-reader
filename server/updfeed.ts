@@ -9,11 +9,11 @@ let force = true;
     for(let i = 2; i<process.argv.length; i++) {
       let url = process.argv[i];
       D.verbose(`updating feed for ${url}`);
-      await rss.updFeed(url,force);
+      await rss.loadFeed(url,force);
     }
   } else {
     D.verbose(`updating all feeds`);
-    await rss.updAllFeeds(force);
+    await rss.loadAllFeeds(force);
   }
   D.verbose("done");
   process.exit();

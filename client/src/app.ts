@@ -2,7 +2,10 @@ import * as T from "./types.js";
 import * as E from "entities";
 import Tablesort = require("tablesort");
 
-let eH = E.encodeHTML;
+let eH = (s: string|undefined|null) => {
+  if (!s) return '';
+  return E.encodeHTML(s);
+};
 
 // maybe defined by browser extension
 declare var openInBackground : (url: string) => void;
@@ -398,11 +401,11 @@ async function showFeeds(p: URLSearchParams|undefined) {
   let input = feedsDiv.querySelector('input#filter')! as HTMLInputElement;
   let filter = () => {
     let v = input.value.toLowerCase();
-    console.log(`search for ${v}`);
+    // console.log(`search for ${v}`);
     feedsDiv.querySelectorAll('tr.feed').forEach(e => {
       let text = (e.children[1] as HTMLElement).innerText.toLowerCase();
       let w = text.includes(v) ? '' : 'none';
-      console.log(`[${w}] ${text}`);
+      // console.log(`[${w}] ${text}`);
       (e as HTMLElement).style.display = w;
     });
   }
@@ -412,13 +415,13 @@ async function showFeeds(p: URLSearchParams|undefined) {
     timer = setTimeout(filter, 100);
   }
   if (input.value) filter();
-  console.log("added onkeydown at input " + input.onkeydown);
 
   // edit on double-click over feed
   feedsDiv.ondblclick = (e) => {
     let tr = e.target instanceof HTMLElement &&  e.target.closest('tr.feed');
     if (!tr) return;
-    console.log(tr);
+    // console.log(tr);
+    editFeed(tr as HTMLElement);
   };
 }
 
@@ -428,12 +431,17 @@ async function showFeeds(p: URLSearchParams|undefined) {
 function handleKeyDown(e: KeyboardEvent) {
   if (e.ctrlKey || e.altKey || e.metaKey) return;
   if ((e.target as HTMLElement).matches('input')) {
-    console.log("ignore keypress " + e.key);
+    // console.log("ignore keypress " + e.key);
     return; // filter input
   }
   if (localKeydown) return localKeydown(e);
+  if (e.key == '?') {
+    showHelp();
+    e.preventDefault();
+    return;
+  } 
 
-  console.log(activeMenu, e.key);
+  // console.log(activeMenu, e.key);
   if (activeMenu == 'items') {
     if (e.key == "ArrowUp" || e.key == 'k') {
       activateByOffset(-1);
@@ -461,8 +469,6 @@ function handleKeyDown(e: KeyboardEvent) {
       markReadAllVisible();
     } else if (e.key == 'h') {
       toggleVisibilityUnread();
-    } else if (e.key == '?') {
-      showHelp();
     } else {
       return;
     }
@@ -513,7 +519,7 @@ function moveIntoView(e: HTMLElement, pad = 50) {
   } else {
     return;
   }
-  console.log('scrollBy',scroll);
+  // console.log('scrollBy',scroll);
   window.scrollBy(0,scroll);
 }
 
@@ -599,6 +605,85 @@ async function rest(cmd: string, data: any = undefined) : Promise<any> {
   })
 }
 
+// ---------------------- Edit feed  ---------------------------------------------
+
+function editFeed(tr: HTMLElement) {
+  rest('get-feed', { rowid: tr.dataset.id }).then(feed => {
+    let modal = document.getElementById('modal')!;
+    let mc = document.getElementById('modal-content')!;
+    mc.innerHTML = `
+      <form>
+        <table>
+          <tr>
+            <td>Title</td>
+            <td>${eH(feed.title)}</td>
+          </tr>
+          <tr>
+            <td>URL</td>
+            <td><input size=100 name=url value="${eH(feed.url)}" /></td>
+          </tr>
+          <tr>
+          <td>Domain</td>
+          <td><input size=100 name=domain value="${eH(feed.domain)}" /></td>
+        </tr>
+        <tr><td colspan=2>
+          <button type=reset>Cancel</button>
+          <button type=submit>Save</button>
+        </td></tr>
+        </table>
+      </form>
+    `;
+
+    let form = mc.getElementsByTagName('form')[0]!;
+    let editDone = (save: boolean, e: Event) => {
+      let down = () => {
+        console.log('down Edit Feed');
+        modal.style.display = 'none';
+        localKeydown = undefined;
+      };
+      if (save) {
+        let nf : T.Feed = { ...feed };
+        nf.url = form.url.value;
+        nf.domain = form.domain.value;
+        let changed : string[] = [];
+        if (nf.url != feed.url) changed.push('url');
+        if (nf.domain != (feed.domain || '')) changed.push('domain');
+        // console.log({ save: save, changed: changed, ...nf });
+        if (changed && save) {
+          form.onreset = null;
+          form.onsubmit = null;
+          localKeydown = (e) => { e.preventDefault() };
+          rest('update-feed', nf).then(() => {
+            console.log('saved');
+            (tr.querySelector('.url')! as HTMLElement).innerText = nf.url;
+            if (nf.domain) (tr.querySelector('.icon')! as HTMLImageElement).src = "/api/icon/"+nf.domain;
+            down();
+          }).catch((why) => {
+            console.log('saving failed: ' + why);
+            down();
+          });
+          e.preventDefault();
+          return;
+        }
+      } else {
+        console.log("not saved");
+      }
+      down();
+      e.preventDefault();
+    };
+
+    form.onreset = (e) => { editDone(false, e) };
+    form.onsubmit = (e) => { editDone(true, e) };
+
+    console.log('Edit Feed up');
+    modal.style.display = 'block';
+    localKeydown = (e: KeyboardEvent) => {
+      if (e.key == 'Escape') return editDone(false,e);
+      e.preventDefault();
+    }
+  });
+}
+
 
 // ---------------------- Help window ---------------------------------------------
 
@@ -607,53 +692,23 @@ function showHelp() {
   let mc = document.getElementById('modal-content')!;
   mc.innerHTML = `
   <table id="help">
-  <thead>
-  <tr>
-  <th>Key(s)</th>
-  <th>Action</th>
-  </tr>
-  </thead>
+  <!-- <thead><tr><th>Key(s)</th><th>Action</th></tr></thead> -->
   <tbody>
-  <tr>
-  <td>j, Arrow Down</td>
-  <td>next item</td>
-  </tr>
-  <tr>
-  <td>k, Arrow Up</td>
-  <td>previous item</td>
-  </tr>
-  <tr>
-  <td>Space</td>
-  <td>toggle current item details</td>
-  </tr>
-  <tr>
-  <td>Enter</td>
-  <td>open current item in new tab and mark it read</td>
-  </tr>
-  <tr>
-  <td>m</td>
-  <td>mark current item read</td>
-  </tr>
-  <tr>
-  <td>n</td>
-  <td>mark all items read which are currently in view</td>
-  </tr>
-  <tr>
-  <td>a</td>
-  <td>mark all items read until the current one</td>
-  </tr>
-  <tr>
-  <td>u</td>
-  <td>undo last "mark read" operation</td>
-  </tr>
-  <tr>
-  <td>h</td>
-  <td>toggle display of items marked as read</td>
-  </tr>
-  <tr>
-  <td>f</td>
-  <td>toggle between Feeds and Items view</td>
-  </tr>
+   <tr><td class=h3 colspan=2>ItemView</td></tr>
+   <tr><td>?</td><td>this help</td></tr>
+   <tr><td>j, Arrow Down</td><td>next item</td></tr>
+   <tr><td>k, Arrow Up</td><td>previous item</td></tr>
+   <tr><td>Space</td><td>toggle current item details</td></tr>
+   <tr><td>Enter</td><td>open current item in new tab and mark it read</td></tr>
+   <tr><td>m</td><td>mark current item read</td></tr>
+   <tr><td>n</td><td>mark all items read which are currently in view</td></tr>
+   <tr><td>a</td><td>mark all items read until the current one</td></tr>
+   <tr><td>u</td><td>undo last "mark read" operation</td></tr>
+   <tr><td>h</td><td>toggle display of items marked as read</td></tr>
+   <tr><td>f</td><td>toggle between Feeds and Items view</td></tr>
+   <tr><td class=h3 colspan=2>FeedView</td></tr>
+   <tr><td>DoubleClick</td><td>edit feed</td></tr>
+   <tr><td>f</td><td>toggle between Feeds and Items view</td></tr>
   </tbody>
   </table>
   `;

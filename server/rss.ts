@@ -18,13 +18,6 @@ export default class RSS {
     this.db = new Db(dbfile);
   }
 
-  async updAllFeeds(force=false) {
-    let ids = await this.db.getAllFeedIds();
-    for (let i = 0; i < ids.length; i++) {
-      await this.updFeed(ids[i], force);
-    }
-  }
-
   async addFeed(url: string, check4dup = true) : Promise<T.Feed> {
     if (check4dup) {
       let exists = await this.db.getFeed(url);
@@ -54,7 +47,22 @@ export default class RSS {
     if (feed) await this.db.delFeed(feed.rowid);
   }
 
-  async updFeed(id: number | string, force = false) {
+  async getFeed(id: number|string) {
+    return this.db.getFeed(id);
+  }
+
+  async updFeed(feed: T.Feed) {
+    return this.db.updFeed(feed);
+  }
+
+  async loadAllFeeds(force=false) {
+    let ids = await this.db.getAllFeedIds();
+    for (let i = 0; i < ids.length; i++) {
+      await this.loadFeed(ids[i], force);
+    }
+  }
+
+  async loadFeed(id: number | string, force = false) {
     let feed = await this.db.getFeed(id);
     if (!feed) {
       if (typeof id == "number") throw `rowid ${id} not found`;

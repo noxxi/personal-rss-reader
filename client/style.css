@@ -83,10 +83,14 @@ body { max-width: 80em; padding: 1em; }
   border-bottom: 1px solid black;
 }
 
-table#help { border-width: 0; border-collapse: collapse; width: 100%;  }
+table#help { border: 0; border-collapse: collapse; margin: 2em auto;  }
 table#help tr:nth-child(even) { background-color: #f2f2f2; }
-table#help td { padding: 1em 2em; }
-table#help th { text-align: left; padding: 1em 2em; border: 1px solid black; }
+table#help tr:nth-child(odd) { background-color: #fafafa; }
+table#help th { background-color: #ddd; }
+table#help td,th { padding: 0.5em 2em; text-align: left; }
+table#help td:first-child,th:first-child { text-align: right;}
+table#help td.h3 { text-align: center; background-color: silver; padding: 0.5em; font-size: 130%; }
+
 
 #cataas { text-align: center;}
 #cataas img { max-width: 70vw; max-height: 60vh; padding: 10px; border-width: 2px; border-style: solid; border-color: grey; }

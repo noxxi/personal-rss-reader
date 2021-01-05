@@ -5,7 +5,8 @@ import * as T from './types'
 import debug, * as D from './log'
 
 let rss = new RSS('data.sqlite');
-D.level(5);
+let devel_debug = 0;
+D.level(devel_debug ? 10:5);
 
 const app = express()
 const port = 3000
@@ -36,6 +37,22 @@ app.get('/api/get-feeds', (req, res) => {
       res.json(feeds)
     })
 });
+
+app.post('/api/get-feed', (req, res) => {
+  let rowid = +req.body.rowid;
+  rss.getFeed(rowid)
+    .then(feed => {
+      res.json(feed)
+    })
+});
+
+app.post('/api/update-feed', (req, res) => {
+  rss.updFeed(req.body)
+    .then(rowid => {
+      res.json({ rowid: rowid })
+    })
+});
+
 app.post('/api/set-read', (req, res) => {
   let items = req.body.items as number[];
   rss.markItemsRead(items);
@@ -70,7 +87,8 @@ app.listen(port, () => {
 
 function updateRSS() {
   // D.xdebug(5,"update All Feeds");
-  rss.updAllFeeds().then(() => {
+  if (devel_debug) return;
+  rss.loadAllFeeds().then(() => {
     // D.xdebug(3,"update feeds done");
     updateTimer = setTimeout(updateRSS, 5000);
   })
