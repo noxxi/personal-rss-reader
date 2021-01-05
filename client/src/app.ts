@@ -669,36 +669,13 @@ function editFeed(tr: HTMLElement) {
 // ---------------------- Help window ---------------------------------------------
 
 function showHelp() {
-  let modal = document.getElementById('modal')!;
-  let mc = document.getElementById('modal-content')!;
-  mc.innerHTML = `
-  <table id="help">
-  <!-- <thead><tr><th>Key(s)</th><th>Action</th></tr></thead> -->
-  <tbody>
-   <tr><td class=h3 colspan=2>ItemView</td></tr>
-   <tr><td>?</td><td>this help</td></tr>
-   <tr><td>j, Arrow Down</td><td>next item</td></tr>
-   <tr><td>k, Arrow Up</td><td>previous item</td></tr>
-   <tr><td>Space</td><td>toggle current item details</td></tr>
-   <tr><td>Enter</td><td>open current item in new tab and mark it read</td></tr>
-   <tr><td>m</td><td>mark current item read</td></tr>
-   <tr><td>n</td><td>mark all items read which are currently in view</td></tr>
-   <tr><td>a</td><td>mark all items read until the current one</td></tr>
-   <tr><td>u</td><td>undo last "mark read" operation</td></tr>
-   <tr><td>h</td><td>toggle display of items marked as read</td></tr>
-   <tr><td>f</td><td>toggle between Feeds and Items view</td></tr>
-   <tr><td class=h3 colspan=2>FeedView</td></tr>
-   <tr><td>DoubleClick</td><td>edit feed</td></tr>
-   <tr><td>f</td><td>toggle between Feeds and Items view</td></tr>
-  </tbody>
-  </table>
-  `;
-  modal.style.display = 'block';
-  console.log('show Help up');
-  localKeydown = (e: KeyboardEvent) => {
-    console.log('down show Help');
-    modal.style.display = 'none';
+  let dialog = document.getElementById('showHelp')! as HTMLDialogElement;
+  localKeydown = () => { dialog.close() }
+  dialog.onclick = () => { dialog.close() }
+  dialog.onclose = () => {
+    console.log('show Help down');
     localKeydown = undefined;
-    e.preventDefault();
-  }
+  };
+  console.log('show Help up');
+  dialog.showModal();
 }
