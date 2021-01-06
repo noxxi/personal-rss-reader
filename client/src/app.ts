@@ -476,14 +476,23 @@ function handleKeyDown(e: KeyboardEvent) {
     return; // filter input
   }
   if (localKeydown) return localKeydown(e);
-  if (e.key == '?') {
-    showHelp();
-    e.preventDefault();
-    return;
-  } 
 
   // console.log(activeMenu, e.key);
-  if (activeMenu == 'items') {
+  // global keys
+  let done = true;
+  if (e.key == '?') {
+    showHelp();
+  } else if (e.key == 'r') {
+    spa(); // just refresh
+  } else if (e.key == "f") {
+    spa({menu: activeMenu == 'items' ? 'feeds' : 'items'});
+  } else {
+    done = false;
+  }
+
+  // keys specific to items view
+  if (!done && activeMenu == 'items') {
+    done = true;
     if (e.key == "ArrowUp" || e.key == 'k') {
       activateByOffset(-1);
     } else if (e.key == "ArrowDown" || e.key == 'j') {
@@ -511,18 +520,10 @@ function handleKeyDown(e: KeyboardEvent) {
     } else if (e.key == 'h') {
       toggleVisibilityUnread();
     } else {
-      return;
+      done = false;
     }
-    e.preventDefault();
-
-  } else if (activeMenu == 'feeds') {
-    if (e.key == "f") {
-      spa({menu: 'items'});
-    } else {
-      return;
-    }
-    e.preventDefault();
   }
+  if (done) e.preventDefault();
 }
 
 // opens active item in new tab [Enter]
