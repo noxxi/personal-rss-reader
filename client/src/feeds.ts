@@ -85,7 +85,7 @@ async function show(p: URLSearchParams) {
   addFeedButton.onclick = () => {
     let url = input.value;
     if (!confirm(`Add ${url} as new Feed?`)) return;
-    rest('update-feed', { url: url, title: "NO TITLE YET" })
+    rest('update-feed', { url: url, title: "NO TITLE YET", rowid: 0, domain: '' })
       .then(feed => {
         console.log(`added ${url} as new feed`, feed);
         main.spa();
@@ -119,10 +119,15 @@ async function show(p: URLSearchParams) {
     addFeedButton.style.display = addFeed ? 'inline' : 'none';
   }
   let timer: any;
-  input.onkeydown = input.onpaste = () => {
+  let deferFilter = () => {
     if (timer) clearTimeout(timer);
     timer = setTimeout(filter, 100);
-  }
+  };
+  input.onpaste = deferFilter;
+  input.onkeydown = (e) => {
+    if (e.key == 'Escape') input.value = '';
+    deferFilter();
+  };
   if (input.value) filter();
 
   // edit on double-click over feed

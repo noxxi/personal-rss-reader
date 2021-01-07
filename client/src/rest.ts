@@ -40,7 +40,7 @@ let queue = (function(){
   }
 
   // run next queue entries, up to maxq in parallel
-  function runQ() {
+  async function runQ() {
     if (active >= maxq) return; // wait for fetch to finish first
     let e = waitq.shift();
     if (!e) return; // nothing to do
@@ -59,20 +59,17 @@ let queue = (function(){
       args['headers'] = { 'Content-Type': 'application/json' };
       args['body'] = JSON.stringify(e.data);
     }
-    let cb = e.callback;
-    fetch(url, args)
-      .then(r => {
-        console.log(`${url} returned: ${r.status}`)
-        if (!r.ok) cb(r.status, undefined)
-        else cb(undefined, r.json());
-        updActive(-1);
-        runQ();
-      })
-      .catch(err => {
-        cb(err, undefined);
-        updActive(-1);
-        runQ();
-      });
+    try {
+      let r = await fetch(url, args);
+      console.log(`${url} returned: ${r.status}`);
+      if (!r.ok) throw r.status;
+      e.callback(undefined, r.json());
+    } catch (err) {
+      console.log(`fetch ${url} failed: ${err}`);
+      e.callback(err, undefined);
+    }
+    updActive(-1);
+    runQ();
   }
 
   // just update information about currently running events
