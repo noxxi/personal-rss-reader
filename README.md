@@ -95,9 +95,42 @@ might need a hard refresh to clear the relevant parts of the cache.
 
 ## How it looks like
 
+### ItemView - List of new items to read
+
+Full keyboard navigation in list. <Space> to toggle inline details. <Enter> to
+open link in new tab.
+
 ![ItemView](img/ItemView.png)
+
+### ItemView - Everything done 
+
+If no more items to show it gets a cat picture from cataas.com.
+
 ![ItemView when all is done](img/ItemViewCat.png)
+
+### ItemView - Help  
+
+Pressing '?' shows the help
+
 ![ItemView with Help](img/ItemViewHelp.png)
+
+### FeedView - List of all Feeds
+
+For each feed it shows the number of total and unread items in DB. One can
+follow these links to get an ItemView with only the items for this Feed. When
+following the "total" the already read links are shown too. Hover over a feed
+shows more details (the URL).
+
+The view can be filtered by entering something in the filter input. If a URL is
+entered there and there is no feed matching this URL yet it will offer to add
+this URL as new feed.
+
 ![FeedView](img/FeedView.png)
+
+### FeedView - Edit Feed
+
+Double-Click in a feed makes it possible to edit the feed information URL and
+domain for icon. Title is retrieved from the feed itself.
+
 ![Edit of Feed](img/FeedViewEdit.png)
 
