@@ -63,7 +63,14 @@ async function show(p: URLSearchParams) {
       nodes += `<div class="date">${eH(date)}</div>`;
     }
     
-    let domain = item.domain || new URL(item.url).host;
+    let domain = item.domain;
+    if (!domain) {
+      try {
+        domain = new URL(item.url).host;
+      } catch {
+        return;
+      }
+    }
     nodes += `
       <div class="item" data-id="${eH(item.rowid.toString())}"${isread(item.read)}>
        <div>
