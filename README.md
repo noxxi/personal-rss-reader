@@ -93,6 +93,12 @@ might need a hard refresh to clear the relevant parts of the cache.
 - Referrer-Policy is set to same-origin, so that no HTTP-Referer is send when
   opening or including content from external sites.
 
+## Open Tabs in Background
+
+To have a workflow where tabs from the reader are opened in the background
+one can use the browser extension in webext-background-tab/. See there for
+installation.
+
 ## How it looks like
 
 ### ItemView - List of new items to read

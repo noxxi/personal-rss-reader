@@ -1,0 +1,14 @@
+{
+    "manifest_version": 2,
+    "name": "BackgroundTab.X",
+    "version": "1.0",
+    "content_scripts": [
+	{
+	    "matches" : [ "http://localhost:3000/*" ],
+	    "js" : [ "content.js" ]
+        }
+    ],
+    "background": {
+        "scripts": ["background.js"]
+    }
+}
