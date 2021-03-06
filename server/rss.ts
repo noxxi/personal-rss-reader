@@ -163,13 +163,18 @@ export default class RSS {
         again.push(feeditem.rowid);
         continue;
       }
-      D.xdebug(4,`new item ${item.link}: ${item.title} ${item.isoDate}`);
+
+      let date = item.isoDate ? new Date(item.isoDate).getTime() : now;
+      if (feed.lastupd && feed.lastupd > date) {
+        D.xdebug(5,`item is older (${date}) than lastupd (${feed.lastupd}) - ${item.title} ${item.link}`);
+        continue;
+      }
+      D.xdebug(4,`new item ${item.link}: ${item.title} ${date}`);
 
       item.content = sanitizeHtml(item.content || item.summary || "",{
         allowedTags: sanitizeHtml.defaults.allowedTags.concat([ 'img' ])
       });
 
-      let date = item.isoDate ? new Date(item.isoDate).getTime() : now;
       if (date>lastupd) lastupd = date;
       await this.db.updItem({
         title: item.title || "",
