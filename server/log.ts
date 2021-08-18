@@ -8,9 +8,9 @@ export default function debug(...msg: any[]) {
 }
 
 export function xdebug(level: number, ...msg: any[]) {
-  if (_debug>level) { console.log(`DEBUG[${level}] `,...msg) }
+  if (_debug>=level) { console.log(Date.now() + `  DEBUG[${level}] `,...msg) }
 }
 
 export function verbose(...msg: any[]) {
-  console.log('[*] ',...msg);
+  console.log(Date.now() + '  [*] ',...msg);
 }

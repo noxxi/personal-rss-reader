@@ -77,10 +77,10 @@ export default class RSS {
     if (!force) {
       let nextUpdIn = feed.lastcheck + feed.updateInterval - now;
       if (nextUpdIn>0) {
-        D.xdebug(6,`skip update feed ${feed.url}: ${feed.title} [${feed.rowid}] - next update in ${nextUpdIn}`);
+        D.xdebug(4,`skip update feed ${feed.url}: ${feed.title} [${feed.rowid}] - next update in ${nextUpdIn}`);
         return;
       }
-      D.xdebug(6,`need update feed ${feed.url}: ${feed.title} [${feed.rowid}] - last=${feed.lastcheck} ivl=${feed.updateInterval} -> ${nextUpdIn}`);
+      D.xdebug(4,`need update feed ${feed.url}: ${feed.title} [${feed.rowid}] - last=${feed.lastcheck} ivl=${feed.updateInterval} -> ${nextUpdIn}`);
     } else {
       D.xdebug(6,`forced update feed ${feed.url}: ${feed.title} [${feed.rowid}]`);
     }
@@ -90,10 +90,10 @@ export default class RSS {
       feed.lastcheck = now;
       if (lastupd) {
         feed.lastupd = lastupd;
-        D.xdebug(6,`got new updates for ${feed.title} at ${feed.url}`);
+        D.xdebug(4,`got new updates for ${feed.title} at ${feed.url}`);
         feed.updateInterval = diff / this.updateInterval_backoff;
       } else {
-        D.xdebug(6,`no new updates for ${feed.title} at ${feed.url}`);
+        D.xdebug(4,`no new updates for ${feed.title} at ${feed.url}`);
         feed.updateInterval = diff * this.updateInterval_backoff;
       }
       // D.xdebug(7,`diff=${diff} updi=${feed.updateInterval}`)
@@ -103,7 +103,7 @@ export default class RSS {
       } else if (feed.updateInterval > this.updateInterval_max) {
         feed.updateInterval = this.updateInterval_max;
       }
-      D.xdebug(7,`diff=${diff} updi=${feed.updateInterval}`)
+      D.xdebug(4,`${feed.title} at ${feed.url} - diff=${diff} updi=${feed.updateInterval}`)
       await this.db.updFeed(feed);
     };
 
@@ -115,7 +115,9 @@ export default class RSS {
     });
     let output: Parser.Output<CustomItem>|undefined = undefined;
     try { 
-      let res = await fetch(feed.url);
+      D.xdebug(4,`start fetching ${feed.url} for ${feed.title}`);
+      let res = await fetch(feed.url, { timeout: 30 });
+      D.xdebug(4,`end fetching ${feed.url} for ${feed.title}: ${res} ${res.ok}`);
       if (!res.ok)
         throw(`status=${res.status} ${res.statusText}`);
       let text = await res.text();
@@ -135,9 +137,9 @@ export default class RSS {
       feed.lastcheck = now;
       feedid = await this.db.updFeed(feed);
       feed.rowid = feedid
-      D.xdebug(6,`new feed ${feed.title} at ${feed.url} -> rowid=${feedid}`);
+      D.xdebug(4,`new feed ${feed.title} at ${feed.url} -> rowid=${feedid}`);
     } else {
-      D.xdebug(6,`update feed ${feed.title} at ${feed.url}, rowid=${feedid}`);
+      D.xdebug(4,`update feed ${feed.title} at ${feed.url}, rowid=${feedid}`);
     }
 
     let items = output.items;
@@ -224,7 +226,8 @@ export default class RSS {
 
       // then try to fetch the file and update in database
       try {
-        let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`);
+        let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`,
+          { timeout: 30 });
         if (result.ok) icon.data = Buffer.from(await result.arrayBuffer());
       } catch {}
       if (icon.data.byteLength) icon.rowid = await this.db.updIcon(icon);

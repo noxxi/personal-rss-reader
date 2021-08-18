@@ -129,10 +129,10 @@ app.listen(port, () => {
 })
 
 function updateRSS() {
-  // D.xdebug(5,"update All Feeds");
-  if (devel_debug) return;
+  D.xdebug(3,"update All Feeds");
+  // if (devel_debug) return;
   rss.loadAllFeeds().then(() => {
-    // D.xdebug(3,"update feeds done");
+    D.xdebug(3,"update feeds done");
     updateTimer = setTimeout(updateRSS, 5000);
   })
 }
