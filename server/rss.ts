@@ -116,7 +116,7 @@ export default class RSS {
     let output: Parser.Output<CustomItem>|undefined = undefined;
     try { 
       D.xdebug(4,`start fetching ${feed.url} for ${feed.title}`);
-      let res = await fetch(feed.url, { timeout: 30 });
+      let res = await fetch(feed.url, { timeout: 30000 });
       D.xdebug(4,`end fetching ${feed.url} for ${feed.title}: ${res} ${res.ok}`);
       if (!res.ok)
         throw(`status=${res.status} ${res.statusText}`);
@@ -227,7 +227,7 @@ export default class RSS {
       // then try to fetch the file and update in database
       try {
         let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`,
-          { timeout: 30 });
+          { timeout: 30000 });
         if (result.ok) icon.data = Buffer.from(await result.arrayBuffer());
       } catch {}
       if (icon.data.byteLength) icon.rowid = await this.db.updIcon(icon);
