@@ -23,7 +23,8 @@ function toTimeOrDate(t:number) {
 }
 
 let eH = (s: string|undefined|null) => {
-  if (!s) return '';
+  if (!s || !s.length) return '';
+  // console.log(`eH=${s.length}|${s}|`);
   return entities.encodeHTML(s);
 };
 
