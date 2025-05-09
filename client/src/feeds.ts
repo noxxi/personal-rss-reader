@@ -110,7 +110,7 @@ async function show(p: URLSearchParams) {
       try {
         let u = new URL(v);
         if (u.protocol != 'http:' && u.protocol != 'https:') throw "wrong protocol";
-        if (!u.hostname.match(/^\w+(\.\w+)+$/)) throw "not a hostname";
+        if (!u.hostname.match(/^[\w\-]+(\.[\w-]+)+$/)) throw "not a hostname";
         if (u.pathname.length + u.search.length <2) throw "path too short";
       } catch {
         addFeed = false;

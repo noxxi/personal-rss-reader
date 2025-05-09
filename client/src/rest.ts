@@ -52,7 +52,7 @@ let queue = (function(){
     let timer = setTimeout(() => {
       clearTimeout(timer);
       abort.abort();
-    }, 2000);
+    }, 10000);
     let args: { [k:string]: any } = { signal: abort.signal };
     if (e.data) {
       args['method'] = 'POST';
