@@ -8,6 +8,16 @@ export type Feed = {
   domain: string;
 };
 
+export type Feed_DB = {
+  rowid: number;
+  url: string;
+  title: string;
+  lastcheck: number;
+  lastupd: number;
+  update_interval: number;
+  domain: string;
+}
+
 export type XFeed = Feed & {
   total: number;
   unread: number;

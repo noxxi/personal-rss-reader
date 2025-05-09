@@ -46,7 +46,7 @@ app.get('/api/get-feeds', async (req, res) => {
     let feeds = await rss.getXFeeds();
     res.json(feeds);
   } catch(why) {
-    fail(why, req, res);
+    fail(why as string, req, res);
   }
 });
 
@@ -57,7 +57,7 @@ app.post('/api/get-feed', async (req, res) => {
     let feed = await rss.getFeed(rowid);
     res.json(feed);
   } catch(why) {
-    fail(why, req, res);
+    fail(why as string, req, res);
   }
 });
 
@@ -80,7 +80,7 @@ app.post('/api/update-feed', async (req, res) => {
     let rowid = rss.updFeed(feed);
     res.json({rowid});
   } catch(why) {
-    fail(why, req, res);
+    fail(why as string, req, res);
   }
 });
 
@@ -91,7 +91,7 @@ app.post('/api/delete-feed', async (req, res) => {
     rss.delFeed(rowid);
     res.json({ result: 'ok'})
   } catch(why) {
-    fail(why, req, res);
+    fail(why as string, req, res);
   }
 });
 
@@ -118,7 +118,7 @@ app.get('/api/icon/:domain', async (req,res) => {
     res.setHeader('Expires', new Date(Date.now() + 2592000000).toUTCString());
     res.send(data);
   } catch(why) {
-    fail(why, req, res);
+    fail(why as string, req, res);
   }
 });
 

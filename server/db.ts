@@ -95,7 +95,7 @@ export default class Db {
         } else if (!rows) {
           resolve([]);
         } else {
-          resolve(rows.map((v) => v.rowid));
+          resolve(rows.map((v) => (v as T.Feed_DB).rowid));
         }
       });
     });
@@ -107,7 +107,7 @@ export default class Db {
         "select rowid,* from feeds where " +
           (typeof id == "number" ? "rowid=?" : "url=?"),
         [id],
-        function (err, row) {
+        function (err, row: T.Feed_DB) {
           if (err) {
             reject(err);
           } else if (!row) {
@@ -142,7 +142,7 @@ export default class Db {
           }
           let res: T.XFeed[] = [];
           for(let i = 0; i<rows.length; i++) {
-            let row = rows[i];
+            let row = rows[i] as T.Feed_DB & { total: number; unread: number; };
             res.push({
               rowid: row.rowid,
               url: row.url,
@@ -195,7 +195,7 @@ export default class Db {
 	      "select i.rowid,i.*,f.domain,r.date as read from items i join feeds f on i.feed=f.rowid left join read r on r.item = i.rowid " +
         "where " + (typeof id == "number" ? "i.rowid=?" : "i.url=?"),
         [id],
-        function (err, row) {
+        function (err, row: T.Feed_DB & T.FeedItem & { read: number }) {
           if (err) {
             reject(err);
           } else if (!row) {
@@ -246,7 +246,8 @@ export default class Db {
           resolve([]);
         } else {
           resolve(
-            rows.map((row) => {
+            rows.map((v) => {
+              let row = v as T.Feed_DB & T.FeedItem & { read: number };
               return {
                 rowid: row.rowid,
                 url: row.url,
@@ -322,7 +323,7 @@ export default class Db {
         "select rowid,* from icons where " +
           (typeof id == "number" ? "rowid=?" : "domain=?"),
         [id],
-        function (err, row) {
+        function (err, row: T.Icon) {
           if (err) {
             reject(err);
           } else if (!row) {
