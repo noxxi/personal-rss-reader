@@ -12,8 +12,9 @@ CERT_FILE = 'cert.pem'
 KEY_FILE = 'key.pem'
 
 # Preload image paths (sorted for deterministic ordering)
+base = Path(IMAGE_DIR)
 image_paths = sorted(
-    list(Path(IMAGE_DIR).rglob("*.jpg")) + list(Path(IMAGE_DIR).rglob("*.png"))
+    list(base.rglob("*.jpg", case_sensitive=False)) + list(base.rglob("*.png", case_sensitive=False)) + list(base.rglob("*.jpeg", case_sensitive=False)) + list(base.rglob("*.gif", case_sensitive=False))
 )
 
 if not image_paths:
@@ -37,8 +38,10 @@ class RandomImageHandler(http.server.SimpleHTTPRequestHandler):
                 self.send_error(400, f"Bad request: {e}")
                 return
 
+
+            self.log_message("serving %s", selected)
             self.send_response(200)
-            content_type = "image/jpeg" if selected.suffix.lower() == ".jpg" else "image/png"
+            content_type = "image/png" if selected.suffix.lower() == ".png" else "image/jpeg"
             self.send_header("Content-type", content_type)
             self.end_headers()
             with open(selected, 'rb') as f:
