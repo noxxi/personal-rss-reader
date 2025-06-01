@@ -88,8 +88,7 @@ async function show(p: URLSearchParams) {
 
 // activate a specific item, deactivates the previous one
 function activateItem(e: HTMLElement) {
-  if (activeItem) {
-    // if (activeItem == e) return;
+  if (activeItem && activeItem != e) {
     toggleVisibilityContent(activeItem, -1);
     activeItem.id = '';
   }

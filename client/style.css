@@ -147,3 +147,34 @@ th[role=columnheader]:not(.no-sort):hover:after {
 	opacity: 1;
 }
 
+/* bottom bar on mobile devices */
+.mobile-bottom-bar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 90%;
+  z-index: 1000;
+  padding: 10px 15px;
+  justify-content: space-around;
+}
+
+.mobile-bottom-bar button {
+  flex: 1;
+  margin: 0 1em;
+  border-radius: 5px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: grey;
+  padding: 0.3em 0.5em;
+}
+
+@media (hover: none) {
+  .mobile-bottom-bar {
+    display: flex;
+  }
+  body {
+    margin: 0;
+    padding-bottom: 60px; /* Ensure content isn't hidden behind bar */
+  }
+}

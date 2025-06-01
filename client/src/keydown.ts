@@ -13,6 +13,19 @@ let localKeyDown: keyboardCB | undefined;
 
 function init() {
   window.onkeydown = handleKeyDown;
+  let b = document.getElementById("mark-read-all")! as HTMLButtonElement;
+  b.onclick = (e) => { items.markReadAllVisible(); }
+  b = document.getElementById("mark-read-until")! as HTMLButtonElement;
+  b.onclick = (e) => {
+    let oa = items.activeItem;
+    items.activateByOffset(+1);
+    items.markReadUntil(oa);
+    items.activateByOffset(0);
+  }
+  b = document.getElementById("undo")! as HTMLButtonElement;
+  b.onclick = (e) => { items.unmarkRead(); }
+  b = document.getElementById("toggle-hidden")! as HTMLButtonElement;
+  b.onclick = (e) => { items.toggleVisibilityUnread(); }
 }
 
 function setLocalKeyDown(cb: keyboardCB|undefined) {
