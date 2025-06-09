@@ -10,6 +10,7 @@ export {
   unmarkRead,                 // undo last "mark read" operation (multiple undo possible)
   toggleVisibilityContent,    // show/hide content of item
   toggleVisibilityUnread,     // show/hide unread items
+  togglePreserved,            // mark/unmark item as preserved
   activeItem                  // current active item (for keyboard control)
 };
 
@@ -182,6 +183,7 @@ function markRead(node: HTMLElement|undefined) {
   let e = findItemNode(node);
   if (!e) return;
   if (e.dataset.read) return;
+  if (e.classList.contains('preserved')) return;
   e.dataset.read = Date.now().toString();
   fixDateShownInItemList();
   rest('set-read', {items: [+e.dataset.id!]});
@@ -196,6 +198,7 @@ function markReadUntil(node: HTMLElement|undefined) {
   for(let i=0; i<items.length; i++) {
     let ii = items[i] as HTMLElement;
     if (ii.dataset.read) continue;
+    if (ii.classList.contains('preserved')) continue;
     m.push(ii);
     if (ii == e) {
       if (!m.length) break;
@@ -212,6 +215,13 @@ function markReadUntil(node: HTMLElement|undefined) {
   }  
 }
 
+// toggle preserved flag of specific item
+function togglePreserved(e: HTMLElement|undefined) {
+  e = findItemNode(e);
+  if (!(e)) return;
+  e.classList.toggle("preserved");
+}
+
 // mark all visible items read [n]
 function markReadAllVisible(pad = 20) {
   let items = itemsDiv.getElementsByClassName('item');
@@ -219,6 +229,7 @@ function markReadAllVisible(pad = 20) {
   for(let i=0; i<items.length; i++) {
     let ii = items[i] as HTMLElement;
     if (ii.dataset.read) continue;
+    if (ii.classList.contains('preserved')) continue;
     let box = ii.getBoundingClientRect();
     if (box.bottom < pad || box.top > window.innerHeight-pad) continue;
     m.push(ii);

@@ -44,6 +44,8 @@ body { max-width: 80em; padding: 1em; }
 
 #items .icon { width: 16px; height: 16px; padding-right: 4px; }
 
+#items .preserved { background-color: #ddd;}
+
 
 #header {
   position: fixed;

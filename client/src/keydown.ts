@@ -13,6 +13,8 @@ let localKeyDown: keyboardCB | undefined;
 
 function init() {
   window.onkeydown = handleKeyDown;
+
+  // on mobile provide functionality via buttons instead of keyboard
   let b = document.getElementById("mark-read-all")! as HTMLButtonElement;
   b.onclick = (e) => { items.markReadAllVisible(); }
   b = document.getElementById("mark-read-until")! as HTMLButtonElement;
@@ -26,6 +28,18 @@ function init() {
   b.onclick = (e) => { items.unmarkRead(); }
   b = document.getElementById("toggle-hidden")! as HTMLButtonElement;
   b.onclick = (e) => { items.toggleVisibilityUnread(); }
+
+  // long press on mobile should mark item for preservation
+  // so that it does not gets deleted on markRead*
+  let longPressTimer: NodeJS.Timeout;
+  let it = document.getElementById("items") as HTMLDivElement;
+  it.ontouchstart = function(e) {
+    longPressTimer = setTimeout(() => {
+      items.togglePreserved(e.target as HTMLElement);
+    }, 500)
+  }
+  it.ontouchmove = it.ontouchcancel = it.ontouchend =
+    function(e) { clearTimeout(longPressTimer); }
 }
 
 function setLocalKeyDown(cb: keyboardCB|undefined) {
