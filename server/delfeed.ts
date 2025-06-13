@@ -8,6 +8,7 @@ D.level(10);
     let url = process.argv[i];
     D.verbose(`deleting feed for ${url}`);
     await rss.delFeed(url);
+    await rss.cleanupUnused();
   }
   D.verbose("done");
   process.exit();

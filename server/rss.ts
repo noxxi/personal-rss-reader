@@ -208,6 +208,14 @@ export default class RSS {
     this.db.markItemsUnread(items);
   }
 
+  async cleanupUnused() {
+    await this.db.cleanupUnused();
+  }
+
+  async delOldItems(days: number) {
+    await this.db.delOldItems(days);
+  }
+
   async getIcon(domain: string) : Promise<ArrayBuffer | undefined> {
     // first try with local file
     try {

@@ -1,6 +1,8 @@
 import sqlite3 from "sqlite3";
 import * as D from "./log";
 import * as T from './types';
+import { resolve } from "path";
+import { rejects } from "assert";
 
 
 export default class Db {
@@ -85,6 +87,25 @@ export default class Db {
         }
       })
     })
+  }
+
+  delOldItems(days: number): Promise<void> {
+    let min_lastseen = Date.now() - 1000*86400*days;
+    return new Promise((resolve, reject) => {
+      this.db.run("delete from items where lastseen<?", min_lastseen, (err) => {
+        if (err) reject(err);
+        else resolve();
+      })
+    }) 
+  }
+
+  cleanupUnused(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.db.run("delete from read where item not in (select oid from items)", (err) => {
+        if (err) reject(err);
+        else resolve();
+      })
+    }) 
   }
 
   getAllFeedIds(): Promise<number[]> {
