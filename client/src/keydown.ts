@@ -31,15 +31,27 @@ function init() {
 
   // long press on mobile should mark item for preservation
   // so that it does not gets deleted on markRead*
-  let longPressTimer: NodeJS.Timeout;
   let it = document.getElementById("items") as HTMLDivElement;
+  let startX = 0;
+  let startY = 0;
+  let isSwiping: boolean;
   it.ontouchstart = function(e) {
-    longPressTimer = setTimeout(() => {
-      items.togglePreserved(e.target as HTMLElement);
-    }, 500)
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    isSwiping = false;
   }
-  it.ontouchmove = it.ontouchcancel = it.ontouchend =
-    function(e) { clearTimeout(longPressTimer); }
+  it.ontouchmove = function(e) {
+    let deltaX = e.touches[0].clientX - startX;
+    let deltaY = e.touches[0].clientY - startY;
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 30) { // 30px threshold
+      if (!isSwiping) {
+        isSwiping = true;
+        items.togglePreserved(e.target as HTMLElement);
+      }
+    }
+  }
+  it.ontouchcancel = it.ontouchend =
+    function(e) { isSwiping = false; }
 }
 
 function setLocalKeyDown(cb: keyboardCB|undefined) {
