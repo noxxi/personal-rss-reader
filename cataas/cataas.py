@@ -43,6 +43,9 @@ class RandomImageHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(200)
             content_type = "image/png" if selected.suffix.lower() == ".png" else "image/jpeg"
             self.send_header("Content-type", content_type)
+            self.send_header("X-Filename", selected)
+            self.send_header("Access-Control-Allow-Origin", self.headers['Origin'])
+            self.send_header("Access-Control-Expose-Headers", 'X-Filename');
             self.end_headers()
             with open(selected, 'rb') as f:
                 self.wfile.write(f.read())

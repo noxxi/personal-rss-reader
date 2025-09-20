@@ -12,13 +12,36 @@ function init() {
 function show(enable: boolean) {
   if (!cataasDiv) return;
   cataasDiv.style.display = 'block';
-  let url = localStorage.getItem("cataas") || "https://cataas.com/cat?i=";
   if (enable) {
-    cataasDiv.innerHTML = `
-      <div class="title">Sorry, no items. But here is a cat.</div>
-      <div class="img"><img src="${url}${Math.floor(Math.random()*100000)}" referrerpolicy="no-referrer"></div>
-    `;
+    let url = localStorage.getItem("cataas") || "https://cataas.com/cat?i=";
+    loadImage(url + Math.floor(Math.random()*100000), cataasDiv);
   } else {
     cataasDiv.innerHTML = '';
+  }
+}
+
+async function loadImage(url: string, div: HTMLDivElement) {
+  try {
+    const response = await fetch(url, { method: "GET" });
+    const blob = await response.blob();
+    const objectURL = URL.createObjectURL(blob);
+    const filename = response.headers.get('x-filename');
+
+    div.innerHTML = `
+      <div class="title">Sorry, no items. But here is a cat.</div>
+      <div class="img"><img id="cataas-img" referrerpolicy="no-referrer"></div>
+    `;
+
+    const imgEl = document.getElementById("cataas-img");
+    if (!(imgEl instanceof HTMLImageElement)) {
+      throw new Error("no cataas-img id in HTML");
+    }
+    imgEl.src = objectURL;
+    imgEl.onload = () => URL.revokeObjectURL(objectURL);
+    if (filename != null) {
+      imgEl.title = filename;
+    }
+  } catch (err) {
+    console.error("Failed to load image:", err);
   }
 }
