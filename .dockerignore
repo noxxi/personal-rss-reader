@@ -1,0 +1,36 @@
+# Git files
+.git
+.gitignore
+
+# Node modules (will be installed during build)
+node_modules
+*/node_modules
+
+# Build artifacts
+server/*.js
+server/*.js.map
+client/app.js
+
+# Data files (will be mounted as volumes)
+server/data.sqlite
+server/favicons
+data
+favicons
+
+# Documentation
+README.md
+img
+*.md
+
+# Other directories
+nginx
+webext-background-tab
+cataas
+
+# IDE and system files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+.DS_Store

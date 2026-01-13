@@ -10,12 +10,14 @@ import * as F from "fs";
 
 export default class RSS {
   private db: Db;
+  private faviconsPath: string;
   public updateInterval_min = 60*1000; // 1 minute
   public updateInterval_max = 600*1000; // 10 minutes
   public updateInterval_backoff = 1.3;
 
   constructor(dbfile: string) {
     this.db = new Db(dbfile);
+    this.faviconsPath = process.env.FAVICONS_PATH || "favicons";
   }
 
   async addFeed(url: string, check4dup = true) : Promise<T.Feed> {
@@ -219,8 +221,8 @@ export default class RSS {
   async getIcon(domain: string) : Promise<ArrayBuffer | undefined> {
     // first try with local file
     try {
-      let result = await F.promises.readFile(`favicons/${domain}.png`);
-      if (result.byteLength) return result;
+      let result = await F.promises.readFile(`${this.faviconsPath}/${domain}.png`);
+      if (result.byteLength) return result.buffer.slice(result.byteOffset, result.byteOffset + result.byteLength);
     } catch {}
 
     // then check in database
@@ -236,7 +238,7 @@ export default class RSS {
       try {
         let result = await fetch(`http://www.google.com/s2/favicons?domain=${domain}`,
           { timeout: 30000 });
-        if (result.ok) icon.data = Buffer.from(await result.arrayBuffer());
+        if (result.ok) icon.data = await result.arrayBuffer();
       } catch {}
       if (icon.data.byteLength) icon.rowid = await this.db.updIcon(icon);
     }
@@ -247,7 +249,7 @@ export default class RSS {
 }
 
 function generic_rss_icon() {
-  return Buffer.from(`
+  const buf = Buffer.from(`
     iVBORw0KGgoAAAANSUhEUgAAAQAAAAEACAYAAABccqhmAAAZpElEQVR4Xu2dC3RU1fXG90wm88hr
     gkirAgZEtQpIFCuIoLQiKiBEBUWsEv0DQgUJUtW2rhqsii9qBAUEiqCCoKgoL0FRUEDUVgIgan0R
     wbeYzGSSzEwe93/WXomzQCCZPObuc+/3W+usQVma4XLPd7/9nX3OdZAQypee5Cei7NqRqUYHHtYA
@@ -366,4 +368,5 @@ function generic_rss_icon() {
     kMtiAAAoqa3vl5Ma7QuiAUoQDjINFgN/7apBduzTFqUCgLUvrB0b1ITfSCbx/9mJxbYd10AJAAAA
     AElFTkSuQmCCNjYyMQ==
   `, 'base64');
+  return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength);
 }

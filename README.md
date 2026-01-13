@@ -26,18 +26,68 @@
 
 ## Setup
 
-### Software installation
+### Option 1: Docker Deployment (Recommended)
+
+The easiest way to run the RSS reader is using Docker. This method ensures all dependencies are properly contained and your data persists outside the container.
+
+#### Prerequisites
+
+- Docker and Docker Compose installed on your system
+
+#### Quick Start
+
+1. Clone or download this repository
+2. Start the application with Docker Compose:
+
+```bash
+docker-compose up -d
+```
+
+This will:
+- Build the Docker image with all dependencies
+- Start the RSS reader on http://localhost:3000
+- Create `data/` and `favicons/` directories in the project root for persistent storage
+
+#### Data Persistence
+
+Your data is stored outside the Docker container in these directories:
+- `./data/data.sqlite` - SQLite database containing feeds and items
+- `./favicons/` - Cached feed icons
+
+These directories are automatically created and mounted as volumes, so your data persists even if you rebuild or update the container.
+
+#### Managing the Docker Container
+
+```bash
+# Start the container
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop the container
+docker-compose down
+
+# Rebuild after code changes
+docker-compose up -d --build
+```
+
+### Option 2: Manual Installation
+
+If you prefer to run without Docker:
+
+#### Software installation
 
 - nodejs is needed, tested with v10.19.0 on Ubuntu 20.04
 - Typescript compiler is needed, tested with 3.8.3 on Ubuntu 20.04
 - to install these on Ubuntu 20.04: `apt install nodejs node-typescript`
 
-### Load dependencies and compile
+#### Load dependencies and compile
 
     $ (cd server && npm i && tsc)
     $ (cd client && npm i && tsc && npx webpack)
 
-### Startup and Run
+#### Startup and Run
 
     $ (cd server && node --insecure-http-parser server.js)
 

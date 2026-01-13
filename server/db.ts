@@ -9,7 +9,8 @@ export default class Db {
   private db: sqlite3.Database;
 
   constructor(file: string) {
-    this.db = new sqlite3.Database("data.sqlite");
+    const dbPath = process.env.DB_PATH || file || "data.sqlite";
+    this.db = new sqlite3.Database(dbPath);
     this.db.on('trace', sql => { D.xdebug(9,`SQL: ${sql}`)})
     sqlite3.verbose();
     this.db.exec(`
