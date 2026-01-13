@@ -111,6 +111,46 @@ button#add-feed { background-color: orange; border-radius: 5px; padding: 0.1em 0
 #cataas { text-align: center;}
 #cataas img { max-width: 70vw; max-height: 60vh; padding: 10px; border-width: 2px; border-style: solid; border-color: grey; }
 #cataas .title { padding: 2em; }
+#cataas .geo-location {
+  padding: 1em;
+  margin-top: 0.5em;
+}
+#cataas .geo-location a {
+  color: #0066cc;
+  text-decoration: none;
+  font-size: 14px;
+  padding: 0.5em 1em;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: inline-block;
+  background-color: #f5f5f5;
+  transition: background-color 0.2s, border-color 0.2s;
+}
+#cataas .geo-location a:hover {
+  background-color: #e8f4f8;
+  border-color: #0066cc;
+  text-decoration: underline;
+}
+#cataas .details-toggle {
+  cursor: pointer;
+  color: #666;
+  font-size: 14px;
+  padding: 0.5em;
+  margin-top: 0.5em;
+}
+#cataas .details-toggle:hover {
+  color: #0066cc;
+}
+#cataas .details-content {
+  padding: 0.5em;
+}
+#cataas .detail-item {
+  padding: 0.5em;
+}
+#cataas .date-taken {
+  color: #666;
+  font-size: 14px;
+}
 
 #indicator-unread-visible { color: green; display: none; }
 
