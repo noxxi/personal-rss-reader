@@ -2,11 +2,10 @@ import http.server
 import ssl
 import random
 import urllib.parse
-import urllib.request
-import json
 from pathlib import Path
 from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
+import reverse_geocoder as rg
 
 # Config
 IMAGE_DIR = "images"  # Folder containing images (supports .jpg and .png)
@@ -121,34 +120,29 @@ def get_date_taken(image_path):
         return None
 
 def get_location_name(latitude, longitude):
-    """Reverse geocode coordinates to get location name using OpenStreetMap Nominatim.
+    """Reverse geocode coordinates to get location name using offline reverse_geocoder.
     Returns a string with city/area name or None if not available."""
     try:
-        url = f"https://nominatim.openstreetmap.org/reverse?lat={latitude}&lon={longitude}&format=json&zoom=10"
-        req = urllib.request.Request(url, headers={'User-Agent': 'CatImageServer/1.0'})
-        with urllib.request.urlopen(req, timeout=5) as response:
-            data = json.loads(response.read().decode('utf-8'))
+        # reverse_geocoder returns a list of results
+        results = rg.search((latitude, longitude), mode=1)
 
-            address = data.get('address', {})
-            # Try to get the most relevant location name
-            # Priority: city > town > village > municipality > county > state > country
-            for key in ['city', 'town', 'village', 'municipality', 'county', 'state', 'country']:
-                if key in address:
-                    location = address[key]
-                    # Add country if different from main location
-                    country = address.get('country', '')
-                    if country and key != 'country':
-                        return f"{location}, {country}"
-                    return location
-
-            # Fallback to display_name if no specific location found
-            display_name = data.get('display_name', '')
-            if display_name:
-                # Return first two parts of the display name
-                parts = display_name.split(', ')
-                return ', '.join(parts[:2]) if len(parts) > 1 else parts[0]
-
+        if not results:
             return None
+
+        result = results[0]
+
+        # result is an OrderedDict with keys: lat, lon, name (city), admin1, admin2, cc (country code)
+        # Build location string from non-empty fields
+        parts = []
+        for key in ['name', 'admin2', 'admin1', 'cc']:
+            value = result.get(key, '')
+            if value:
+                parts.append(value)
+
+        if parts:
+            return ', '.join(parts)
+
+        return None
     except Exception as e:
         # If reverse geocoding fails, just return None
         return None

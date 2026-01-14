@@ -53,9 +53,9 @@ Server runs on http://localhost:3000/
 ### Cat Picture Server (Optional)
 ```bash
 # Install dependencies
-pip install Pillow
+pip install Pillow reverse_geocoder
 
-# Run the custom cat picture server with GPS extraction
+# Run the custom cat picture server with GPS extraction and offline location names
 cd cataas && python cataas.py
 ```
 
@@ -152,7 +152,13 @@ Command line tools (**addfeed.ts**, **delfeed.ts**, **updfeed.ts**, **delolditem
 - Returns coordinates with 6 decimal places precision
 - Gracefully handles images without GPS data
 
-**Dependencies:** Requires Pillow (PIL) for EXIF reading: `pip install Pillow`
+**Offline Reverse Geocoding:**
+- Converts GPS coordinates to location names (city, country) completely offline
+- Uses reverse_geocoder library with K-D tree for fast lookups
+- No network requests or API rate limits
+- Lightweight (2.2 MB) with minimal dependencies
+
+**Dependencies:** Requires Pillow (PIL) for EXIF reading and reverse_geocoder for offline location names: `pip install Pillow reverse_geocoder`
 
 ### Database Schema
 
@@ -224,8 +230,9 @@ Must configure `manifest.json` to match your deployment URL (default: http://loc
 
 - The client can use any cat picture service via localStorage setting: `localStorage.setItem("cataas", "https://your-server/")`
 - Default is cataas.com (public service)
-- The custom cataas.py server in cataas/ directory provides GPS coordinate extraction
-- To run custom server: `cd cataas && python cataas.py` (requires Pillow: `pip install Pillow`)
+- The custom cataas.py server in cataas/ directory provides GPS coordinate extraction and offline location names
+- To run custom server: `cd cataas && python cataas.py` (requires Pillow and reverse_geocoder: `pip install Pillow reverse_geocoder`)
 - Custom server requires cert.pem and key.pem for HTTPS
-- GPS coordinates displayed as clickable Google Maps link below image when available
+- GPS coordinates displayed as clickable Google Maps link with location name (e.g., "San Francisco, US") below image when available
+- Location names generated completely offline using reverse_geocoder (no API calls, no rate limits)
 - Feature gracefully degrades if images lack GPS data or if using standard cataas.com
