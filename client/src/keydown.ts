@@ -7,6 +7,7 @@ export {
 import { openItem } from "./items";
 import * as main from "./main";
 import * as items from "./items";
+import * as cataas from "./cataas";
 
 type keyboardCB = (e: KeyboardEvent) => void;
 let localKeyDown: keyboardCB | undefined;
@@ -109,6 +110,8 @@ function handleKeyDown(e: KeyboardEvent) {
       items.markReadAllVisible();
     } else if (e.key == 'h') {
       items.toggleVisibilityUnread();
+    } else if (e.key == 'x') {
+      cataas.toggleDetails();
     } else {
       done = false;
     }

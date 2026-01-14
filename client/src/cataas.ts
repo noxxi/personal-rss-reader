@@ -1,7 +1,8 @@
 // use CatAsAService to provide cat picture when new items can be shown
-export { 
+export {
   init,  // initialization
   show,  // show/hide cat picture
+  toggleDetails,  // toggle details visibility (location, date)
 }
 
 let cataasDiv: HTMLDivElement|undefined;
@@ -100,5 +101,12 @@ async function loadImage(url: string, div: HTMLDivElement) {
     }
   } catch (err) {
     console.error("Failed to load image:", err);
+  }
+}
+
+function toggleDetails() {
+  const toggleEl = document.getElementById("cataas-toggle");
+  if (toggleEl) {
+    toggleEl.click();
   }
 }
