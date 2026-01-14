@@ -111,12 +111,12 @@ app.get('/api/icon/:domain', async (req,res) => {
   try {
     let domain = req.params.domain;
     if (!domain) throw "no domain given";
-    console.log(`get icon for ${domain}`);
     let data = await rss.getIcon(domain);
     res.setHeader('Content-Type','image/png');
     res.setHeader("Cache-Control", "public, max-age=2592000");
     res.setHeader('Expires', new Date(Date.now() + 2592000000).toUTCString());
-    res.send(data);
+    // Convert ArrayBuffer to Buffer since Express res.send() doesn't handle ArrayBuffer
+    res.send(data instanceof ArrayBuffer ? Buffer.from(data) : data);
   } catch(why) {
     fail(why as string, req, res);
   }

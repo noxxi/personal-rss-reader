@@ -222,7 +222,7 @@ export default class RSS {
     // first try with local file
     try {
       let result = await F.promises.readFile(`${this.faviconsPath}/${domain}.png`);
-      if (result.byteLength) return result.buffer.slice(result.byteOffset, result.byteOffset + result.byteLength);
+      if (result.byteLength) return result.buffer.slice(result.byteOffset, result.byteOffset + result.byteLength) as ArrayBuffer;
     } catch {}
 
     // then check in database

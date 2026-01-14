@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-alpine AS builder
+FROM node:18-bullseye AS builder
 
 # Install TypeScript globally
 RUN npm install -g typescript
@@ -26,7 +26,7 @@ RUN cd server && tsc
 RUN cd client && tsc && npx webpack
 
 # Runtime stage
-FROM node:18-alpine
+FROM node:18-bullseye
 
 WORKDIR /app
 
