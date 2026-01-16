@@ -6,6 +6,7 @@ export interface NotifyOptions {
     type: NotificationType;
     message: string;
     duration?: number; // Auto-dismiss after duration (ms), 0 = no auto-dismiss
+    delay?: number; // Delay before showing notification (ms), 0 = show immediately
     onRetry?: () => void; // Optional retry callback for error notifications
 }
 
@@ -17,10 +18,13 @@ interface Notification {
     onRetry?: () => void;
     element: HTMLElement;
     timeoutId?: number;
+    delayTimeoutId?: number; // For delayed display
+    isVisible: boolean; // Whether notification has been shown yet
 }
 
 let container: HTMLElement | null = null;
 let notifications: Map<string, Notification> = new Map();
+let delayedNotifications: Map<string, number> = new Map(); // Track delayed show timers
 let idCounter = 0;
 
 /**
@@ -63,19 +67,9 @@ function getIcon(type: NotificationType): string {
 }
 
 /**
- * Create and show a notification
- * Returns the notification ID for later updates/dismissal
+ * Create notification element
  */
-export function notify(options: NotifyOptions): string {
-    if (!container) {
-        init();
-    }
-
-    const id = generateId();
-    const duration = options.duration !== undefined ? options.duration :
-                     (options.type === 'success' ? 2000 : 0);
-
-    // Create notification element
+function createNotificationElement(id: string, options: NotifyOptions): HTMLElement {
     const element = document.createElement('div');
     element.className = `notification notification-${options.type}`;
     element.setAttribute('data-notification-id', id);
@@ -124,12 +118,51 @@ export function notify(options: NotifyOptions): string {
     // Click anywhere on notification to dismiss (except buttons which stop propagation)
     element.onclick = () => dismiss(id);
 
+    return element;
+}
+
+/**
+ * Show notification element (add to DOM with animation)
+ */
+function showNotificationElement(notification: Notification): void {
+    if (!container) {
+        init();
+    }
+
     // Add to container with animation
-    container!.appendChild(element);
+    container!.appendChild(notification.element);
 
     // Trigger reflow for animation
-    element.offsetHeight;
-    element.classList.add('notification-show');
+    notification.element.offsetHeight;
+    notification.element.classList.add('notification-show');
+
+    notification.isVisible = true;
+
+    // Auto-dismiss if duration is set
+    if (notification.duration > 0) {
+        notification.timeoutId = window.setTimeout(() => {
+            dismiss(notification.id);
+        }, notification.duration);
+    }
+}
+
+/**
+ * Create and show a notification
+ * Returns the notification ID for later updates/dismissal
+ */
+export function notify(options: NotifyOptions): string {
+    if (!container) {
+        init();
+    }
+
+    const id = generateId();
+    const duration = options.duration !== undefined ? options.duration :
+                     (options.type === 'success' ? 2000 :
+                      options.type === 'error' ? 5000 : 0);
+    const delay = options.delay !== undefined ? options.delay : 0;
+
+    // Create notification element
+    const element = createNotificationElement(id, options);
 
     // Store notification
     const notification: Notification = {
@@ -138,16 +171,21 @@ export function notify(options: NotifyOptions): string {
         message: options.message,
         duration,
         onRetry: options.onRetry,
-        element
+        element,
+        isVisible: false
     };
 
     notifications.set(id, notification);
 
-    // Auto-dismiss if duration is set
-    if (duration > 0) {
-        notification.timeoutId = window.setTimeout(() => {
-            dismiss(id);
-        }, duration);
+    // If delay is specified, schedule showing the notification
+    if (delay > 0) {
+        notification.delayTimeoutId = window.setTimeout(() => {
+            notification.delayTimeoutId = undefined;
+            showNotificationElement(notification);
+        }, delay);
+    } else {
+        // Show immediately
+        showNotificationElement(notification);
     }
 
     return id;
@@ -162,6 +200,41 @@ export function update(id: string, options: Partial<NotifyOptions>): void {
     if (!notification) {
         return;
     }
+
+    // If notification is delayed and not yet visible
+    if (notification.delayTimeoutId && !notification.isVisible) {
+        clearTimeout(notification.delayTimeoutId);
+        notification.delayTimeoutId = undefined;
+
+        // If updating to success, don't show it (operation completed quickly)
+        if (options.type === 'success') {
+            notifications.delete(id);
+            return;
+        }
+
+        // If updating to error, show it immediately
+        if (options.type === 'error') {
+            // Update notification properties before showing
+            notification.type = 'error';
+            notification.message = options.message || notification.message;
+            notification.onRetry = options.onRetry;
+            const duration = options.duration !== undefined ? options.duration : 5000;
+            notification.duration = duration;
+
+            // Re-create element with error state
+            notification.element = createNotificationElement(id, {
+                type: 'error',
+                message: notification.message,
+                onRetry: notification.onRetry
+            });
+
+            // Show the notification now
+            showNotificationElement(notification);
+            return;
+        }
+    }
+
+    // Notification is already visible, update it in place
 
     // Clear existing timeout
     if (notification.timeoutId) {
@@ -192,7 +265,8 @@ export function update(id: string, options: Partial<NotifyOptions>): void {
 
     // Update duration and set new timeout
     const duration = options.duration !== undefined ? options.duration :
-                     (options.type === 'success' ? 2000 : 0);
+                     (options.type === 'success' ? 2000 :
+                      options.type === 'error' ? 5000 : 0);
     notification.duration = duration;
 
     // Add/remove retry button if needed
@@ -240,9 +314,18 @@ export function dismiss(id: string): void {
         return;
     }
 
-    // Clear timeout if exists
+    // Clear timeouts if they exist
     if (notification.timeoutId) {
         clearTimeout(notification.timeoutId);
+    }
+    if (notification.delayTimeoutId) {
+        clearTimeout(notification.delayTimeoutId);
+    }
+
+    // If not visible yet (still delayed), just remove from map
+    if (!notification.isVisible) {
+        notifications.delete(id);
+        return;
     }
 
     // Fade out animation
@@ -263,13 +346,20 @@ export function dismiss(id: string): void {
  * Used for ESC key handler
  */
 export function dismissTop(): boolean {
-    if (notifications.size === 0) {
+    // Get visible notifications only
+    const visibleIds: string[] = [];
+    for (const [id, notification] of notifications) {
+        if (notification.isVisible) {
+            visibleIds.push(id);
+        }
+    }
+
+    if (visibleIds.length === 0) {
         return false;
     }
 
-    // Get the last notification (most recent)
-    const ids = Array.from(notifications.keys());
-    const lastId = ids[ids.length - 1];
+    // Get the last visible notification (most recent)
+    const lastId = visibleIds[visibleIds.length - 1];
     dismiss(lastId);
     return true;
 }
@@ -286,14 +376,20 @@ export function dismissAll(): void {
  * Check if any notifications are visible
  */
 export function hasVisibleNotifications(): boolean {
-    return notifications.size > 0;
+    for (const notification of notifications.values()) {
+        if (notification.isVisible) {
+            return true;
+        }
+    }
+    return false;
 }
 
 /**
  * Convenience function for pending notifications
+ * Default delay is 2000ms (only show if operation takes longer than 2 seconds)
  */
-export function pending(message: string): string {
-    return notify({ type: 'pending', message });
+export function pending(message: string, delay: number = 2000): string {
+    return notify({ type: 'pending', message, delay });
 }
 
 /**
