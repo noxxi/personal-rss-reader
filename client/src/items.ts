@@ -47,7 +47,7 @@ async function show(p: URLSearchParams) {
     unread: +(p && p.get('unread') || '0'),
     feed: +(p && p.get('feed') || '0'),
   };
-  let items = (await rest("get-items", filter)) as T.XFeedItem[];
+  let items = (await rest("get-items", filter, { silent: true })) as T.XFeedItem[];
   // console.log(items);
 
   let isread = (r:number) : string => {
@@ -186,7 +186,7 @@ function markRead(node: HTMLElement|undefined) {
   if (e.classList.contains('preserved')) return;
   e.dataset.read = Date.now().toString();
   fixDateShownInItemList();
-  rest('set-read', {items: [+e.dataset.id!]});
+  rest('set-read', {items: [+e.dataset.id!]}, { silent: true });
 }
 
 // mark all items until this one as read [a]

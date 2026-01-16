@@ -18,7 +18,7 @@ function init() {
 }
 
 async function show(p: URLSearchParams) {
-  let feeds = (await rest('get-feeds')) as T.XFeed[];
+  let feeds = (await rest('get-feeds', undefined, { silent: true })) as T.XFeed[];
   cataas.show(false);
   // console.log(feeds);
   let nodes = `
@@ -87,10 +87,7 @@ async function show(p: URLSearchParams) {
     if (!confirm(`Add ${url} as new Feed?`)) return;
     rest('update-feed', { url: url, title: "NO TITLE YET", rowid: 0, domain: '' })
       .then(feed => {
-        console.log(`added ${url} as new feed`, feed);
         main.spa();
-      }).catch(why => {
-        console.log(`failed to add ${url} as feed - ${why}`);
       })
   };
 
@@ -142,7 +139,7 @@ async function show(p: URLSearchParams) {
 
 // edit feed
 function editFeed(tr: HTMLElement) {
-  rest('get-feed', { rowid: tr.dataset.id }).then(feed => {
+  rest('get-feed', { rowid: tr.dataset.id }, { silent: true }).then(feed => {
     let dialog = document.querySelector('#editFeed')! as HTMLDialogElement;
     let form = dialog.getElementsByTagName('form')[0]!;
     let elem = form.elements;
@@ -158,38 +155,32 @@ function editFeed(tr: HTMLElement) {
       let changed : string[] = [];
       if (nf.url != feed.url) changed.push('url');
       if (nf.domain != (feed.domain || '')) changed.push('domain');
-      console.log({ save: save, changed: changed, ...nf });
       if (!changed || !save) return;
       keydown.setLocalKeyDown((e) => { e.preventDefault() });
       rest('update-feed', nf).then(() => {
-        console.log('saved');
         (tr.querySelector('.url')! as HTMLElement).textContent = nf.url;
         (tr.querySelector('.icon')! as HTMLImageElement).src =
           "/api/icon/" + (nf.domain || new URL(nf.url).host);
         final();
-      }).catch((why) => {
-        console.log('saving failed: ' + why);
+      }).catch(() => {
         final();
       });
     };
 
     let cancel = (final: finalcb) => {
-      console.log('edit aborted');
       final();
     };
 
     let deleteFeed = (final: finalcb) => {
-      console.log('delete Feed');
       if (!confirm("Do you really want to delete Feed?")) {
         final();
         return;
       }
       rest('delete-feed', { rowid: feed.rowid }).then(() => {
-        console.log('feed deleted');
         tr.parentElement?.removeChild(tr);
         final();
-      }).catch(why => {
-        console.log('feed not deleted: ' + why);
+      }).catch(() => {
+        final();
       });
     }
 
@@ -208,7 +199,6 @@ function editFeed(tr: HTMLElement) {
       );
     };
 
-    console.log('Edit Feed up');
     dialog.showModal();
     keydown.setLocalKeyDown((e: KeyboardEvent) => {
       if (e.key == 'Escape') return editDone(e, cancel);

@@ -9,6 +9,7 @@ export {
 import * as feeds from "./feeds";
 import * as items from "./items";
 import * as keydown from "./keydown";
+import * as notify from "./notify";
 
 let activeMenu = '';
 let menu2action: { [k:string] : (p: URLSearchParams) => void } = {
@@ -20,6 +21,7 @@ function init() {
   items.init();
   feeds.init();
   keydown.init();
+  notify.init();
   for (let m in menu2action) {
     (document.querySelector('#header #show-'+m) as HTMLElement).onclick = () => {
       spa({ menu: m});

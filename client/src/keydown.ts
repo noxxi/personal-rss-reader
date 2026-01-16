@@ -8,6 +8,7 @@ import { openItem } from "./items";
 import * as main from "./main";
 import * as items from "./items";
 import * as cataas from "./cataas";
+import * as notify from "./notify";
 
 type keyboardCB = (e: KeyboardEvent) => void;
 let localKeyDown: keyboardCB | undefined;
@@ -66,6 +67,16 @@ function handleKeyDown(e: KeyboardEvent) {
     // console.log("ignore keypress " + e.key);
     return; // filter input
   }
+
+  // ESC key: dismiss notifications first, then local handlers
+  if (e.key == 'Escape') {
+    if (notify.hasVisibleNotifications()) {
+      notify.dismissTop();
+      e.preventDefault();
+      return;
+    }
+  }
+
   if (localKeyDown) return localKeyDown(e);
 
   // console.log(main.activeMenu, e.key);
