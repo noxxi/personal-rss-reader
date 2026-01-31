@@ -6,6 +6,7 @@ services:
     container_name: personal-rss-reader
     ports:
       - "3000:3000"
+      - "2999:3001"
     volumes:
       # Mount database directory to persist SQLite database
       - ./data:/app/data
@@ -15,4 +16,6 @@ services:
       - NODE_ENV=production
       - DB_PATH=/app/data/data.sqlite
       - FAVICONS_PATH=/app/favicons
+      # Login server configuration
+      - LOGIN_PORT=3001
     restart: unless-stopped

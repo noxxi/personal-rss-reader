@@ -10,6 +10,8 @@ node_modules
 server/*.js
 server/*.js.map
 client/app.js
+login/*.js
+login/*.js.map
 
 # Data files (will be mounted as volumes)
 server/data.sqlite

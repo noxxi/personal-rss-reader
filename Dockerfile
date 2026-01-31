@@ -7,20 +7,26 @@ RUN npm install -g typescript
 # Set working directory
 WORKDIR /app
 
-# Copy package files for both server and client
+# Copy package files for server, client, and login
 COPY server/package*.json ./server/
 COPY client/package*.json ./client/
+COPY login/package*.json ./login/
 
 # Install dependencies
 RUN cd server && npm install
 RUN cd client && npm install
+RUN cd login && npm install
 
 # Copy source code
 COPY server/ ./server/
 COPY client/ ./client/
+COPY login/ ./login/
 
 # Build TypeScript for server
 RUN cd server && tsc
+
+# Build TypeScript for login server
+RUN cd login && tsc
 
 # Build client with webpack
 RUN cd client && tsc && npx webpack
@@ -35,19 +41,26 @@ COPY --from=builder /app/server/*.js ./server/
 COPY --from=builder /app/server/package*.json ./server/
 COPY --from=builder /app/server/node_modules ./server/node_modules
 
+# Copy built login server files and node_modules
+COPY --from=builder /app/login/login-server.js ./login/
+COPY --from=builder /app/login/login.html ./login/
+COPY --from=builder /app/login/package*.json ./login/
+COPY --from=builder /app/login/node_modules ./login/node_modules
+
 # Copy built client files
 COPY --from=builder /app/client/index.html ./client/index.html
 COPY --from=builder /app/client/style.css ./client/style.css
 COPY --from=builder /app/client/app.js ./client/app.js
 
+# Copy startup script
+COPY start.sh ./start.sh
+RUN chmod +x ./start.sh
+
 # Create directories for persistent data (will be mounted as volumes)
 RUN mkdir -p /app/data /app/favicons
 
-# Set working directory to server
-WORKDIR /app/server
+# Expose ports for both servers
+EXPOSE 3000 3001
 
-# Expose port
-EXPOSE 3000
-
-# Start the application
-CMD ["node", "--insecure-http-parser", "server.js"]
+# Start both applications
+CMD ["./start.sh"]
