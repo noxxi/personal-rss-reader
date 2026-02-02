@@ -6,6 +6,54 @@ import sanitizeHtml from "sanitize-html";
 import fetch from "node-fetch";
 import * as F from "fs";
 
+// Tracking parameters to strip from URLs for deduplication
+const TRACKING_PARAMS = new Set([
+  // UTM parameters (Google Analytics)
+  'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'utm_id',
+  // Click IDs (Ad Platforms)
+  'gclid', 'gclsrc', 'dclid', 'fbclid', 'msclkid', 'twclid', 'yclid', 'igshid',
+  // Email/Marketing Platforms
+  'mc_cid', 'mc_eid', '__s', 'vero_id', 'vero_conv', 'oly_anon_id', 'oly_enc_id',
+  // Analytics
+  '_ga', '_gl', 's_kwcid', 'ef_id', '_openstat',
+  // Generic
+  'ref', 'ref_src', 'ref_url', 'source', 'src', 'campaign', 'affiliate', 'aff_id',
+  'partner', 'trk', 'track', 'tracking', 'clickid', 'click_id', 'zanpid',
+]);
+
+// Patterns for tracking parameters (matched as prefixes)
+const TRACKING_PARAM_PREFIXES = ['utm_', 'wt_', 'mc_'];
+
+function isTrackingParam(param: string): boolean {
+  const lowerParam = param.toLowerCase();
+  if (TRACKING_PARAMS.has(lowerParam)) return true;
+  for (const prefix of TRACKING_PARAM_PREFIXES) {
+    if (lowerParam.startsWith(prefix)) return true;
+  }
+  // Match *clid pattern (gclid, fbclid, msclkid, etc.)
+  if (lowerParam.endsWith('clid')) return true;
+  return false;
+}
+
+function stripTrackingParams(urlString: string): string {
+  try {
+    const url = new URL(urlString);
+    const paramsToDelete: string[] = [];
+    url.searchParams.forEach((_, key) => {
+      if (isTrackingParam(key)) {
+        paramsToDelete.push(key);
+      }
+    });
+    for (const key of paramsToDelete) {
+      url.searchParams.delete(key);
+    }
+    return url.toString();
+  } catch {
+    // If URL parsing fails, return original
+    return urlString;
+  }
+}
+
 
 
 export default class RSS {
@@ -161,7 +209,8 @@ export default class RSS {
         D.xdebug(5,"item has no link", item);
         continue;
       }
-      let feeditem = await this.db.getItem(item.link);
+      const normalizedUrl = stripTrackingParams(item.link);
+      let feeditem = await this.db.getItem(normalizedUrl);
       if (feeditem) {
         D.xdebug(5,`item exists already ${feeditem.url}: ${feeditem.title}`);
         again.push(feeditem.rowid);
@@ -183,7 +232,7 @@ export default class RSS {
       await this.db.updItem({
         title: item.title || "",
         content: item.content,
-        url: item.link || "",
+        url: normalizedUrl,
         date: date,
         rowid: 0,
         feed: feedid,
