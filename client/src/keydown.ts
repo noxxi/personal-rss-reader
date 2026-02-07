@@ -123,6 +123,8 @@ function handleKeyDown(e: KeyboardEvent) {
       items.toggleVisibilityUnread();
     } else if (e.key == 'x') {
       cataas.toggleDetails();
+    } else if (e.key == 'z') {
+      cataas.toggleFullscreen();
     } else {
       done = false;
     }

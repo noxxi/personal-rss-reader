@@ -3,6 +3,7 @@ export {
   init,  // initialization
   show,  // show/hide cat picture
   toggleDetails,  // toggle details visibility (location, date)
+  toggleFullscreen,  // toggle fullscreen cat picture
 }
 
 let cataasDiv: HTMLDivElement|undefined;
@@ -108,5 +109,15 @@ function toggleDetails() {
   const toggleEl = document.getElementById("cataas-toggle");
   if (toggleEl) {
     toggleEl.click();
+  }
+}
+
+function toggleFullscreen() {
+  const img = document.getElementById("cataas-img");
+  if (!img) return;
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    img.requestFullscreen();
   }
 }
