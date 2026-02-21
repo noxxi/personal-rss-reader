@@ -148,59 +148,70 @@ def get_location_name(latitude, longitude):
         return None
 
 class RandomImageHandler(http.server.SimpleHTTPRequestHandler):
-    def do_GET(self):
-        parsed_url = urllib.parse.urlparse(self.path)
-        query = urllib.parse.parse_qs(parsed_url.query)
+    def _select_image(self, query):
         idx_param = query.get("i", [None])[0]
+        if idx_param is not None:
+            seed = int(idx_param)
+            rng = random.Random(seed)
+            return rng.choice(image_paths)
+        else:
+            return random.choice(image_paths)
 
+    def _send_image_headers(self, selected):
+        gps_coords = get_gps_coordinates(selected)
+        date_taken = get_date_taken(selected)
+
+        self.send_response(200)
+        content_type = "image/png" if selected.suffix.lower() == ".png" else "image/jpeg"
+        self.send_header("Content-type", content_type)
+        self.send_header("X-Filename", selected)
+
+        exposed_headers = 'X-Filename'
+        if gps_coords:
+            lat, lon = gps_coords
+            self.send_header("X-Geo-Location", f"{lat:.6f},{lon:.6f}")
+            exposed_headers += ', X-Geo-Location'
+            self.log_message("GPS coordinates: %f, %f", lat, lon)
+
+            location_name = get_location_name(lat, lon)
+            if location_name:
+                self.send_header("X-Location-Name", location_name)
+                exposed_headers += ', X-Location-Name'
+                self.log_message("Location: %s", location_name)
+
+        if date_taken:
+            self.send_header("X-Date-Taken", date_taken)
+            exposed_headers += ', X-Date-Taken'
+            self.log_message("Date taken: %s", date_taken)
+
+        origin = self.headers.get('Origin', '*')
+        self.send_header("Access-Control-Allow-Origin", origin)
+        self.send_header("Access-Control-Expose-Headers", exposed_headers)
+        self.end_headers()
+
+    def do_HEAD(self):
+        parsed_url = urllib.parse.urlparse(self.path)
         if parsed_url.path == "/":
             try:
-                if idx_param is not None:
-                    seed = int(idx_param)
-                    rng = random.Random(seed)
-                    selected = rng.choice(image_paths)
-                else:
-                    selected = random.choice(image_paths)
+                selected = self._select_image(urllib.parse.parse_qs(parsed_url.query))
             except Exception as e:
                 self.send_error(400, f"Bad request: {e}")
                 return
+            self.log_message("HEAD serving %s", selected)
+            self._send_image_headers(selected)
+        else:
+            self.send_error(404)
 
-
+    def do_GET(self):
+        parsed_url = urllib.parse.urlparse(self.path)
+        if parsed_url.path == "/":
+            try:
+                selected = self._select_image(urllib.parse.parse_qs(parsed_url.query))
+            except Exception as e:
+                self.send_error(400, f"Bad request: {e}")
+                return
             self.log_message("serving %s", selected)
-
-            # Extract GPS coordinates and date if available
-            gps_coords = get_gps_coordinates(selected)
-            date_taken = get_date_taken(selected)
-
-            self.send_response(200)
-            content_type = "image/png" if selected.suffix.lower() == ".png" else "image/jpeg"
-            self.send_header("Content-type", content_type)
-            self.send_header("X-Filename", selected)
-
-            # Add GPS coordinates header if available
-            exposed_headers = 'X-Filename'
-            if gps_coords:
-                lat, lon = gps_coords
-                self.send_header("X-Geo-Location", f"{lat:.6f},{lon:.6f}")
-                exposed_headers += ', X-Geo-Location'
-                self.log_message("GPS coordinates: %f, %f", lat, lon)
-
-                # Reverse geocode to get location name
-                location_name = get_location_name(lat, lon)
-                if location_name:
-                    self.send_header("X-Location-Name", location_name)
-                    exposed_headers += ', X-Location-Name'
-                    self.log_message("Location: %s", location_name)
-
-            # Add date taken header if available
-            if date_taken:
-                self.send_header("X-Date-Taken", date_taken)
-                exposed_headers += ', X-Date-Taken'
-                self.log_message("Date taken: %s", date_taken)
-
-            self.send_header("Access-Control-Allow-Origin", self.headers['Origin'])
-            self.send_header("Access-Control-Expose-Headers", exposed_headers)
-            self.end_headers()
+            self._send_image_headers(selected)
             with open(selected, 'rb') as f:
                 self.wfile.write(f.read())
         else:

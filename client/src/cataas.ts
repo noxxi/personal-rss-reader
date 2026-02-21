@@ -24,13 +24,21 @@ function show(enable: boolean) {
 
 async function loadImage(url: string, div: HTMLDivElement) {
   try {
-    const response = await fetch(url, { method: "GET" });
-    const blob = await response.blob();
-    const objectURL = URL.createObjectURL(blob);
-    const filename = response.headers.get('x-filename');
-    const geoLocation = response.headers.get('x-geo-location');
-    const locationName = response.headers.get('x-location-name');
-    const dateTaken = response.headers.get('x-date-taken');
+    // HEAD request to read custom headers without downloading the image body.
+    // Falls back gracefully if HEAD is unsupported (e.g. third-party cataas servers).
+    let filename: string|null = null;
+    let geoLocation: string|null = null;
+    let locationName: string|null = null;
+    let dateTaken: string|null = null;
+    try {
+      const response = await fetch(url, { method: "HEAD" });
+      filename = response.headers.get('x-filename');
+      geoLocation = response.headers.get('x-geo-location');
+      locationName = response.headers.get('x-location-name');
+      dateTaken = response.headers.get('x-date-taken');
+    } catch (_) {
+      // ignore — image will still be displayed without details
+    }
 
     // Build details HTML (hidden by default)
     const detailItems: string[] = [];
@@ -82,8 +90,7 @@ async function loadImage(url: string, div: HTMLDivElement) {
     if (!(imgEl instanceof HTMLImageElement)) {
       throw new Error("no cataas-img id in HTML");
     }
-    imgEl.src = objectURL;
-    imgEl.onload = () => URL.revokeObjectURL(objectURL);
+    imgEl.src = url;
     if (filename != null) {
       imgEl.title = filename;
     }
