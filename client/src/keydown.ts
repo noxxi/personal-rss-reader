@@ -96,9 +96,9 @@ function handleKeyDown(e: KeyboardEvent) {
   if (!done && main.activeMenu == 'items') {
     done = true;
     if (e.key == "ArrowUp" || e.key == 'k') {
-      items.activateByOffset(-1);
+      if (cataas.isActive()) cataas.prevImage(); else items.activateByOffset(-1);
     } else if (e.key == "ArrowDown" || e.key == 'j') {
-      items.activateByOffset(+1);
+      if (cataas.isActive()) cataas.nextImage(); else items.activateByOffset(+1);
     } else if (e.key == " ") {
       items.toggleVisibilityContent(items.activeItem);
     } else if (e.key == 'm') {
