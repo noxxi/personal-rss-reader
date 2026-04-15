@@ -84,7 +84,11 @@ async function show(p: URLSearchParams) {
   itemsDiv.innerHTML = nodes;
   activeItem = undefined;
   toggleVisibilityUnread(!!filter.unread);
+  const wasActive = cataas.isActive();
   activateByOffset(0);
+  // If cataas was already active before this refresh and is still active (no new items),
+  // load a new image so the user gets visible confirmation the refresh happened.
+  if (wasActive && cataas.isActive()) cataas.nextImage();
 }
 
 // activate a specific item, deactivates the previous one
