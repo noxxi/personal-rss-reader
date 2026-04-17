@@ -69,6 +69,9 @@ body { max-width: 80em; padding: 1em; }
 #header .active {
   background-color: darkorange;
 }
+#header .active.busy {
+  background-color: yellow;
+}
 
 #feeds td { padding: 0.2em 0.5em; }
 #feeds th { padding: 0.5em 0.5em; border-left: 4px solid white; border-right: 4px solid white;  }

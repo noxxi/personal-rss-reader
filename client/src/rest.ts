@@ -114,6 +114,9 @@ let queue = (function(){
         activeDiv.textContent = total.toString() + ' outstanding XHR';
       }
     }
+    document.querySelectorAll('#header .active').forEach(el => {
+      el.classList.toggle('busy', total > 0);
+    });
     console.log(`${total} outstanding XHR`);
   }
 
