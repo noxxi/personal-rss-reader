@@ -6,6 +6,7 @@ export {
   toggleFullscreen, // toggle fullscreen cat picture
   nextImage,        // go forward in history (or load new image)
   prevImage,        // go back in history (does nothing if at start)
+  navigateOffset,   // load next (+1) or previous (-1) image relative to current seed
   isActive,         // whether cataas mode is currently active
 }
 
@@ -13,6 +14,8 @@ const MAX_HISTORY = 50;
 let imageHistory: string[] = [];
 let historyIndex = -1;  // index of currently displayed image in imageHistory
 let active = false;
+let currentSeed: number | null = null;
+let currentOffset: number = 0;
 
 let cataasDiv: HTMLDivElement|undefined;
 
@@ -40,16 +43,33 @@ function show(enable: boolean) {
   }
 }
 
+function updateSeedOffsetFromUrl(url: string) {
+  try {
+    const iParam = new URL(url).searchParams.get('i');
+    if (!iParam) { currentSeed = null; currentOffset = 0; return; }
+    const m = iParam.match(/^(\d+)([+-]\d+)?$/);
+    if (!m) { currentSeed = null; currentOffset = 0; return; }
+    currentSeed = parseInt(m[1]);
+    currentOffset = m[2] ? parseInt(m[2]) : 0;
+  } catch {
+    currentSeed = null; currentOffset = 0;
+  }
+}
+
 function nextImage() {
   if (!cataasDiv) return;
   if (historyIndex < imageHistory.length - 1) {
     // go forward in existing history
     historyIndex++;
-    loadImage(imageHistory[historyIndex], cataasDiv);
+    const url = imageHistory[historyIndex];
+    updateSeedOffsetFromUrl(url);
+    loadImage(url, cataasDiv);
   } else {
     // at end of history — fetch a new image
     const base = localStorage.getItem("cataas") || "https://cataas.com/cat?i=";
-    const url = base + Math.floor(Math.random() * 100000);
+    currentSeed = Math.floor(Math.random() * 100000);
+    currentOffset = 0;
+    const url = base + currentSeed;
     if (imageHistory.length >= MAX_HISTORY) {
       imageHistory.shift();
       // historyIndex stays the same numerically but now points one earlier;
@@ -66,7 +86,24 @@ function prevImage() {
   if (!cataasDiv) return;
   if (historyIndex <= 0) return;  // already at oldest entry, do nothing
   historyIndex--;
-  loadImage(imageHistory[historyIndex], cataasDiv);
+  const url = imageHistory[historyIndex];
+  updateSeedOffsetFromUrl(url);
+  loadImage(url, cataasDiv);
+}
+
+function navigateOffset(delta: number) {
+  if (!cataasDiv || !active || currentSeed === null) return;
+  currentOffset += delta;
+  const base = localStorage.getItem("cataas") || "https://cataas.com/cat?i=";
+  const offsetStr = currentOffset > 0 ? `%2B${currentOffset}` : currentOffset < 0 ? `${currentOffset}` : '';
+  const url = base + currentSeed + offsetStr;
+  if (imageHistory.length >= MAX_HISTORY) {
+    imageHistory.shift();
+    historyIndex = Math.max(0, historyIndex - 1);
+  }
+  imageHistory.push(url);
+  historyIndex = imageHistory.length - 1;
+  loadImage(url, cataasDiv);
 }
 
 async function loadImage(url: string, div: HTMLDivElement) {

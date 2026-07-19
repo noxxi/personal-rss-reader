@@ -1,6 +1,7 @@
 import http.server
 import ssl
 import random
+import re
 import urllib.parse
 from pathlib import Path
 from PIL import Image
@@ -151,9 +152,14 @@ class RandomImageHandler(http.server.SimpleHTTPRequestHandler):
     def _select_image(self, query):
         idx_param = query.get("i", [None])[0]
         if idx_param is not None:
-            seed = int(idx_param)
-            rng = random.Random(seed)
-            return rng.choice(image_paths)
+            m = re.match(r'^(\d+)([+-]\d+)?$', idx_param)
+            if not m:
+                raise ValueError(f"Invalid i parameter: {idx_param!r}")
+            seed = int(m.group(1))
+            offset = int(m.group(2)) if m.group(2) else 0
+            base_idx = random.Random(seed).randrange(len(image_paths))
+            idx = (base_idx + offset) % len(image_paths)
+            return image_paths[idx]
         else:
             return random.choice(image_paths)
 

@@ -99,6 +99,12 @@ function handleKeyDown(e: KeyboardEvent) {
       if (cataas.isActive()) cataas.prevImage(); else items.activateByOffset(-1);
     } else if (e.key == "ArrowDown" || e.key == 'j') {
       if (cataas.isActive()) cataas.nextImage(); else items.activateByOffset(+1);
+    } else if (e.key == "ArrowRight") {
+      if (cataas.isActive()) cataas.navigateOffset(+1);
+      else done = false;
+    } else if (e.key == "ArrowLeft") {
+      if (cataas.isActive()) cataas.navigateOffset(-1);
+      else done = false;
     } else if (e.key == " ") {
       items.toggleVisibilityContent(items.activeItem);
     } else if (e.key == 'm') {
@@ -119,6 +125,10 @@ function handleKeyDown(e: KeyboardEvent) {
       items.openItem(items.activeItem);
     } else if (e.key == 'n') {
       items.markReadAllVisible();
+    } else if (e.key == '1') {
+      if (!cataas.isActive()) items.activateByOffset(-Infinity);
+    } else if (e.key == '9') {
+      if (!cataas.isActive()) items.activateByOffset(+Infinity);
     } else if (e.key == 'h') {
       items.toggleVisibilityUnread();
     } else if (e.key == 'x') {
