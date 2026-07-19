@@ -4,7 +4,7 @@ export {
   show,  // show feeds view, includes filter from location.hash
 };
 
-import Tablesort = require("tablesort");
+import Tablesort from "tablesort";
 import { rest } from "./rest";
 import { toTimeOrDate, eH } from "./util";
 import * as keydown from "./keydown";
