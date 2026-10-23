@@ -41,7 +41,9 @@
     // "noFallthroughCasesInSwitch": true,    /* Report errors for fallthrough cases in switch statement. */
 
     /* Module Resolution Options */
-    "moduleResolution": "bundler",            /* Specify module resolution strategy: 'node' (Node.js) or 'classic' (TypeScript pre-1.6). */
+    // moduleResolution intentionally omitted: with module:commonjs, TS defaults to Node
+    // CommonJS resolution. The old explicit "node10" value was removed in TS7+; letting
+    // it default keeps this working across TS5-7+ without being tied to a removed enum.
     // "baseUrl": "./",                       /* Base directory to resolve non-absolute module names. */
     // "paths": {},                           /* A series of entries which re-map imports to lookup locations relative to the 'baseUrl'. */
     // "rootDirs": [],                        /* List of root folders whose combined content represents the structure of the project at runtime. */
