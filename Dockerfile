@@ -1,5 +1,5 @@
 # Build stage
-FROM node:18-bullseye AS builder
+FROM node:22-bookworm AS builder
 
 # Install TypeScript globally
 RUN npm install -g typescript
@@ -13,7 +13,10 @@ COPY client/package*.json ./client/
 COPY login/package*.json ./login/
 
 # Install dependencies
-RUN cd server && npm install
+# sqlite3's prebuilt native binary targets a newer glibc than Debian bookworm
+# ships, so force it to compile from source here against the base image's own
+# glibc/toolchain (present in node:*-bookworm) instead of using the prebuild.
+RUN cd server && npm_config_build_from_source=true npm install
 RUN cd client && npm install
 RUN cd login && npm install
 
@@ -32,7 +35,7 @@ RUN cd login && tsc
 RUN cd client && tsc && npx webpack
 
 # Runtime stage
-FROM node:18-bullseye
+FROM node:22-bookworm
 
 WORKDIR /app
 
